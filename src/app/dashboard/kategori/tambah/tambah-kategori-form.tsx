@@ -53,7 +53,7 @@ export function TambahKategoriForm() {
             Tambah Kategori Menu
           </h2>
           <p className="text-sm text-slate-500 mt-1">
-            Buat kelompok kategori baru untuk produk racikan dan camilan.
+            Buat kelompok kategori baru untuk produk.
           </p>
         </div>
 

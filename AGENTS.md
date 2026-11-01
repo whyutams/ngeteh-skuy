@@ -168,6 +168,9 @@ Dokumen ini adalah aturan utama dan standar baku pengembangan untuk seluruh proy
 - **Wajib Mengacu pada Riwayat Commit Sebelumnya (`git log`)**:
   - Format commit message WAJIB mencontoh dan mengikuti pola yang ada di riwayat git sebelumnya (menggunakan gaya Conventional Commits, contoh: `feat: implementasi login page split screen & auth supabase` atau `feat(db): update schema db`).
   - DILARANG menaruh daftar bullet list nama file mentah di dalam commit message.
+- **Hanya Merangkum Perubahan Saat Ini (Belum Di-commit)**:
+  - Penulisan commit message WAJIB HANYA didasarkan pada perubahan file aktif yang belum di-commit saat ini (`git status` / working tree saat ini).
+  - DILARANG KERAS mendasarkan atau memasukkan perubahan file yang sudah pernah di-commit sebelumnya, sekalipun commit lokal tersebut belum di-push ke remote repository.
 - **HANYA Teks Pesan Commit (Dilarang Perintah Git)**:
   - Setiap kali pengguna menanyakan atau meminta "commit message", AI Agent WAJIB memberikan **HANYA teks commit message murni**.
   - **DILARANG KERAS menyertakan perintah git** (seperti `git commit -m "..."`, `git add .`, dsb).

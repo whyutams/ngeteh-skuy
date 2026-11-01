@@ -86,7 +86,7 @@ export function MenuClient({ initialMenus, categories, isOwner }: MenuClientProp
             Data Menu Seduhan
           </h2>
           <p className="text-sm text-slate-500 mt-1">
-            Daftar seluruh racikan minuman dan camilan {APP_NAME}.
+            Daftar seluruh racikan minuman {APP_NAME}.
           </p>
         </div>
 
@@ -102,9 +102,9 @@ export function MenuClient({ initialMenus, categories, isOwner }: MenuClientProp
       </div>
 
       {/* Filter & Kontrol Pencarian */}
-      <div className="flex flex-col sm:flex-row items-center gap-3 p-4 bg-white rounded-xl border border-slate-200 shadow-xs">
+      <div className="flex flex-col sm:flex-row items-center gap-3 p-3.5 bg-white rounded-xl border border-slate-200 shadow-xs">
         <div className="relative flex-1 w-full">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
           <input
             type="text"
             value={searchQuery}
@@ -113,23 +113,23 @@ export function MenuClient({ initialMenus, categories, isOwner }: MenuClientProp
               setCurrentPage(1);
             }}
             placeholder="Masukkan nama menu"
-            className="w-full bg-slate-50/60 border border-slate-200 rounded-lg py-2.5 pl-10 pr-3.5 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-tea-600 focus:border-transparent transition-colors"
+            className="w-full bg-slate-50/60 border border-slate-200 rounded-lg py-2 pl-9 pr-3 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-tea-600 focus:border-transparent transition-colors"
           />
         </div>
 
-        <div className="flex items-center gap-2 w-full sm:w-auto">
-          <Filter className="h-4 w-4 text-slate-500 shrink-0" />
+        <div className="flex items-center gap-2 w-full sm:w-auto shrink-0">
+          <Filter className="h-3.5 w-3.5 text-slate-400 shrink-0" />
           <select
             value={selectedCategory}
             onChange={(e) => {
               setSelectedCategory(e.target.value);
               setCurrentPage(1);
             }}
-            className="w-full sm:w-48 bg-slate-50/60 border border-slate-200 rounded-lg py-2.5 px-3.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-tea-600 focus:border-transparent cursor-pointer"
+            className="w-full sm:w-40 bg-slate-50/60 border border-slate-200 rounded-lg py-2 px-2.5 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-tea-600 focus:border-transparent cursor-pointer"
           >
-            <option value="all">Semua Kategori</option>
+            <option value="all" className="text-xs py-1">Semua Kategori</option>
             {categories.map((c) => (
-              <option key={c.id} value={c.id}>
+              <option key={c.id} value={c.id} className="text-xs py-1">
                 {c.nama_kategori}
               </option>
             ))}

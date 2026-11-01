@@ -62,7 +62,7 @@ export function KategoriClient({ initialData }: KategoriClientProps) {
             Kategori
           </h2>
           <p className="text-sm text-slate-500 mt-1">
-            Kelola pengelompokan menu seduhan dan camilan {APP_NAME}.
+            Kelola pengelompokan menu seduhan {APP_NAME}.
           </p>
         </div>
 
