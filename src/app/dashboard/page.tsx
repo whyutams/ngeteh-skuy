@@ -1,6 +1,6 @@
 import Link from "next/link";
 import {
-  ShoppingBag,
+  Calculator,
   FolderTree,
   CupSoda,
   Boxes,
@@ -77,7 +77,7 @@ export default async function DashboardPage() {
           href="/dashboard/kasir"
           className="inline-flex items-center justify-center gap-2 px-5 py-3 text-sm font-semibold text-tea-950 bg-amber-400 hover:bg-amber-300 rounded-lg shadow-sm transition-colors shrink-0"
         >
-          <ShoppingBag className="h-5 w-5" />
+          <Calculator className="h-5 w-5" />
           <span>Buka Kasir POS</span>
         </Link>
       </div>

@@ -26,6 +26,7 @@ export interface KaryawanActionResult {
   fieldErrors?: {
     username?: string[];
     full_name?: string[];
+    email?: string[];
     password?: string[];
     confirmPassword?: string[];
   };
@@ -48,19 +49,73 @@ export async function getKaryawanListAction(): Promise<{
 
   try {
     const admin = createAdminClient();
-    const { data, error } = await admin
-      .from("profil_pengguna")
-      .select("id, username, email, full_name, role, is_active, created_at")
-      .eq("role", "karyawan")
-      .order("created_at", { ascending: false });
+    let karyawanList: KaryawanItem[] = [];
+    let shouldFallback = false;
 
-    if (error) {
-      return { success: false, data: [], error: error.message };
+    // 1. Coba ambil dari tabel profil_pengguna
+    try {
+      const { data, error } = await admin
+        .from("profil_pengguna")
+        .select("id, username, email, full_name, role, is_active, created_at")
+        .eq("role", "karyawan")
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        shouldFallback = true;
+      } else if (data && data.length > 0) {
+        karyawanList = data;
+      } else {
+        shouldFallback = true;
+      }
+    } catch {
+      shouldFallback = true;
     }
 
-    return { success: true, data: data || [] };
+    // 2. Fallback: Ambil langsung dari Supabase Auth metadata jika tabel belum ada atau kosong
+    if (shouldFallback) {
+      const { data: authData, error: authErr } = await admin.auth.admin.listUsers({
+        perPage: 1000,
+      });
+
+      if (!authErr && authData?.users) {
+        const authList: KaryawanItem[] = authData.users
+          .filter(
+            (u) =>
+              u.user_metadata?.role === "karyawan" ||
+              (u.email?.endsWith("@ngeteh-skuyy.internal") &&
+                !u.email?.startsWith("estehadmin"))
+          )
+          .map((u) => {
+            const isActive =
+              u.user_metadata?.is_active !== undefined
+                ? Boolean(u.user_metadata.is_active)
+                : true;
+
+            return {
+              id: u.id,
+              username:
+                u.user_metadata?.username ||
+                u.email?.replace(/@.*$/, "") ||
+                "karyawan",
+              email:
+                u.user_metadata?.email ||
+                (u.email?.endsWith("@ngeteh-skuyy.internal") ? null : u.email) ||
+                null,
+              full_name: u.user_metadata?.full_name || null,
+              role: "karyawan",
+              is_active: isActive,
+              created_at: u.created_at,
+            };
+          });
+
+        karyawanList = authList;
+      }
+    }
+
+    return { success: true, data: karyawanList };
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Gagal memuat data karyawan.";
+    const message =
+      err instanceof Error ? err.message : "Gagal memuat data karyawan.";
     return { success: false, data: [], error: message };
   }
 }
@@ -82,20 +137,62 @@ export async function getKaryawanByIdAction(id: string): Promise<{
 
   try {
     const admin = createAdminClient();
-    const { data, error } = await admin
-      .from("profil_pengguna")
-      .select("id, username, email, full_name, role, is_active, created_at")
-      .eq("id", id)
-      .eq("role", "karyawan")
-      .maybeSingle();
 
-    if (error) {
-      return { success: false, data: null, error: error.message };
+    // 1. Coba ambil dari tabel profil_pengguna
+    try {
+      const { data, error } = await admin
+        .from("profil_pengguna")
+        .select("id, username, email, full_name, role, is_active, created_at")
+        .eq("id", id)
+        .eq("role", "karyawan")
+        .maybeSingle();
+
+      if (!error && data) {
+        return { success: true, data };
+      }
+    } catch {
+      // Abaikan jika tabel profil_pengguna belum tersedia
     }
 
-    return { success: true, data };
+    // 2. Fallback: Cari di Supabase Auth
+    const { data: userData, error: userErr } =
+      await admin.auth.admin.getUserById(id);
+
+    if (!userErr && userData?.user) {
+      const u = userData.user;
+      const isActive =
+        u.user_metadata?.is_active !== undefined
+          ? Boolean(u.user_metadata.is_active)
+          : true;
+
+      return {
+        success: true,
+        data: {
+          id: u.id,
+          username:
+            u.user_metadata?.username ||
+            u.email?.replace(/@.*$/, "") ||
+            "karyawan",
+          email:
+            u.user_metadata?.email ||
+            (u.email?.endsWith("@ngeteh-skuyy.internal") ? null : u.email) ||
+            null,
+          full_name: u.user_metadata?.full_name || null,
+          role: "karyawan",
+          is_active: isActive,
+          created_at: u.created_at,
+        },
+      };
+    }
+
+    return {
+      success: false,
+      data: null,
+      error: "Data karyawan tidak ditemukan.",
+    };
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Gagal memuat detail karyawan.";
+    const message =
+      err instanceof Error ? err.message : "Gagal memuat detail karyawan.";
     return { success: false, data: null, error: message };
   }
 }
@@ -117,45 +214,81 @@ export async function createKaryawanAction(
     };
   }
 
-  const { username, full_name, password } = validation.data;
-  const email = `${username.toLowerCase()}@ngeteh-skuyy.internal`;
+  const { username, full_name, email: inputEmail, password } = validation.data;
+  const cleanEmail =
+    inputEmail && inputEmail.trim().length > 0
+      ? inputEmail.trim().toLowerCase()
+      : null;
+  const authEmail =
+    cleanEmail || `${username.toLowerCase()}@ngeteh-skuyy.internal`;
 
   try {
     const admin = createAdminClient();
 
-    // Buat akun di Supabase Auth
+    // 1. Buat akun di Supabase Auth
     const { data: authData, error: authErr } =
       await admin.auth.admin.createUser({
-        email,
+        email: authEmail,
         password,
         email_confirm: true,
         user_metadata: {
           username: username.toLowerCase(),
           full_name,
           role: "karyawan",
+          email: cleanEmail,
+          is_active: true,
         },
       });
 
     if (authErr || !authData.user) {
+      const authMsg = authErr?.message?.toLowerCase() || "";
+      if (
+        authMsg.includes("already registered") ||
+        authMsg.includes("unique") ||
+        authMsg.includes("exists")
+      ) {
+        return {
+          success: false,
+          error: cleanEmail
+            ? "Email atau username ini sudah digunakan. Silakan gunakan yang lain."
+            : `Username "${username}" sudah digunakan. Silakan gunakan username lain.`,
+        };
+      }
       return {
         success: false,
         error: authErr?.message || "Gagal membuat akun karyawan.",
       };
     }
 
-    // Pastikan data tersimpan di tabel profil_pengguna
-    const { error: profileErr } = await admin.from("profil_pengguna").upsert({
-      id: authData.user.id,
-      username: username.toLowerCase(),
-      email,
-      role: "karyawan",
-      full_name,
-      is_active: true,
-      updated_at: new Date().toISOString(),
-    });
+    // 2. Sinkronkan ke tabel profil_pengguna jika tabel sudah siap
+    try {
+      const { error: profileErr } = await admin.from("profil_pengguna").upsert(
+        {
+          id: authData.user.id,
+          username: username.toLowerCase(),
+          email: cleanEmail || authEmail,
+          role: "karyawan",
+          full_name,
+          is_active: true,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: "id" }
+      );
 
-    if (profileErr) {
-      return { success: false, error: profileErr.message };
+      if (profileErr) {
+        const isTableMissing =
+          profileErr.code === "PGRST205" ||
+          profileErr.code === "42P01" ||
+          profileErr.code === "PGRST204";
+        if (!isTableMissing) {
+          console.warn(
+            "Peringatan sinkronisasi profil_pengguna karyawan:",
+            profileErr.message
+          );
+        }
+      }
+    } catch {
+      // Abaikan jika tabel profil_pengguna belum tersedia
     }
 
     revalidatePath("/dashboard/karyawan");
@@ -218,16 +351,24 @@ export async function toggleStatusKaryawanAction(
     const admin = createAdminClient();
     const nextStatus = !currentStatus;
 
-    const { error } = await admin
-      .from("profil_pengguna")
-      .update({
+    // Perbarui di metadata auth Supabase
+    await admin.auth.admin.updateUserById(userId, {
+      user_metadata: {
         is_active: nextStatus,
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", userId);
+      },
+    });
 
-    if (error) {
-      return { success: false, error: error.message };
+    // Coba sinkronkan ke tabel profil_pengguna jika tersedia
+    try {
+      await admin
+        .from("profil_pengguna")
+        .update({
+          is_active: nextStatus,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", userId);
+    } catch {
+      // Abaikan jika tabel profil_pengguna belum tersedia
     }
 
     revalidatePath("/dashboard/karyawan");
@@ -238,4 +379,3 @@ export async function toggleStatusKaryawanAction(
     return { success: false, error: message };
   }
 }
-

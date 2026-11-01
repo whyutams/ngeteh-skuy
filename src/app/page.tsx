@@ -4,6 +4,10 @@ import { LoginForm } from "@/components/auth/login-form";
 import { getCurrentSession } from "@/libs/auth-session";
 import { APP_NAME } from "@/libs/constants";
 
+export const metadata = {
+  title: "Login",
+};
+
 export default async function LoginPage() {
   const session = await getCurrentSession();
 

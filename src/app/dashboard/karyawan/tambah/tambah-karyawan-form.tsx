@@ -19,6 +19,7 @@ export function TambahKaryawanForm() {
   const router = useRouter();
   const [username, setUsername] = useState("");
   const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -49,6 +50,7 @@ export function TambahKaryawanForm() {
       const res = await createKaryawanAction({
         username: username.trim(),
         full_name: fullName.trim(),
+        email: email.trim(),
         password,
         confirmPassword,
       });
@@ -79,7 +81,7 @@ export function TambahKaryawanForm() {
             Tambah Akun Karyawan
           </h2>
           <p className="text-sm text-slate-500 mt-1">
-            Daftarkan akun staf kasir baru untuk melayani transaksi di toko.
+            Daftarkan akun karyawan baru untuk melayani transaksi.
           </p>
         </div>
 
@@ -146,6 +148,27 @@ export function TambahKaryawanForm() {
               {formState?.fieldErrors?.full_name && (
                 <p className="text-rose-500 text-xs mt-1">
                   {formState.fieldErrors.full_name[0]}
+                </p>
+              )}
+            </div>
+
+            {/* Email (Tidak wajib diisi / Opsional) */}
+            <div className="sm:col-span-2 space-y-1.5">
+              <label htmlFor="email" className="block text-sm font-medium text-slate-700">
+                Email
+              </label>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Masukkan email"
+                className="w-full bg-slate-50/60 border border-slate-200 rounded-lg py-2.5 px-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+              />
+              {formState?.fieldErrors?.email && (
+                <p className="text-rose-500 text-xs mt-1">
+                  {formState.fieldErrors.email[0]}
                 </p>
               )}
             </div>

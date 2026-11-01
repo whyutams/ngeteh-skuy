@@ -198,24 +198,26 @@ export function MenuClient({ initialMenus, categories, isOwner }: MenuClientProp
                       </span>
                     </td>
                     {isOwner && (
-                      <td className="py-3.5 px-4 text-right space-x-1">
-                        <Tooltip content="Ubah Menu">
-                          <Link
-                            href={`/dashboard/menu/${item.id}/edit`}
-                            className="inline-flex p-1.5 text-slate-600 hover:text-tea-700 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
-                          >
-                            <Pencil className="h-4 w-4" />
-                          </Link>
-                        </Tooltip>
-                        <Tooltip content="Hapus Menu">
-                          <button
-                            type="button"
-                            onClick={() => setDeleteTarget(item)}
-                            className="p-1.5 text-slate-600 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
-                          >
-                            <Trash className="h-4 w-4" />
-                          </button>
-                        </Tooltip>
+                      <td className="py-3.5 px-4 text-right">
+                        <div className="flex items-center justify-end gap-1">
+                          <Tooltip content="Ubah Menu">
+                            <Link
+                              href={`/dashboard/menu/${item.id}/edit`}
+                              className="inline-flex items-center justify-center p-1.5 text-slate-600 hover:text-tea-700 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
+                            >
+                              <Pencil className="h-4 w-4" />
+                            </Link>
+                          </Tooltip>
+                          <Tooltip content="Hapus Menu">
+                            <button
+                              type="button"
+                              onClick={() => setDeleteTarget(item)}
+                              className="inline-flex items-center justify-center p-1.5 text-slate-600 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
+                            >
+                              <Trash className="h-4 w-4" />
+                            </button>
+                          </Tooltip>
+                        </div>
                       </td>
                     )}
                   </tr>

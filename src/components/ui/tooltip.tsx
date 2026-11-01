@@ -6,6 +6,7 @@ interface TooltipProps {
   content: string;
   children: ReactNode;
   position?: "top" | "bottom" | "left" | "right";
+  className?: string;
 }
 
 // Komponen tooltip modern tanpa atribut title native
@@ -13,6 +14,7 @@ export function Tooltip({
   content,
   children,
   position = "top",
+  className = "",
 }: TooltipProps) {
   const [isVisible, setIsVisible] = useState(false);
 
@@ -25,7 +27,7 @@ export function Tooltip({
 
   return (
     <div
-      className="relative inline-flex"
+      className={`relative inline-flex items-center justify-center ${className}`}
       onMouseEnter={() => setIsVisible(true)}
       onMouseLeave={() => setIsVisible(false)}
       onFocus={() => setIsVisible(true)}

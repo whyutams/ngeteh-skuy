@@ -11,11 +11,38 @@ const notoSans = Noto_Sans({
 });
 
 export const metadata: Metadata = {
-  title: `Login - ${APP_NAME}`,
-  description: `Platform operasional ${APP_NAME}`,
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"
+  ),
+  title: {
+    default: APP_NAME,
+    template: `%s - ${APP_NAME}`,
+  },
+  description: `Aplikasi kasir dan manajemen operasional ${APP_NAME}.`,
   icons: {
-    icon: "/img/logo-web.png",
+    icon: [
+      { url: "/img/logo-web.png" },
+      { url: "/img/logo-web.png", sizes: "192x192", type: "image/png" },
+      { url: "/img/logo-web.png", sizes: "512x512", type: "image/png" },
+    ],
+    shortcut: "/img/logo-web.png",
     apple: "/img/logo-web.png",
+  },
+  openGraph: {
+    title: APP_NAME,
+    description: `Aplikasi kasir dan manajemen operasional ${APP_NAME}.`,
+    url: "/",
+    siteName: APP_NAME,
+    images: [
+      {
+        url: "/img/logo-web.png",
+        width: 512,
+        height: 512,
+        alt: `Logo ${APP_NAME}`,
+      },
+    ],
+    locale: "id_ID",
+    type: "website",
   },
 };
 

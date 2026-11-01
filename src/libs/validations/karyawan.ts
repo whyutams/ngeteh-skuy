@@ -16,6 +16,12 @@ export const createKaryawanSchema = z
       .trim()
       .min(2, { message: "Nama lengkap minimal 2 karakter." })
       .max(80, { message: "Nama lengkap maksimal 80 karakter." }),
+    email: z
+      .string()
+      .trim()
+      .email({ message: "Format email tidak valid." })
+      .or(z.literal(""))
+      .optional(),
     password: z
       .string()
       .min(8, { message: "Password minimal 8 karakter." })

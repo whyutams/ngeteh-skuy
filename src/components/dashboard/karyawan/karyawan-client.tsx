@@ -63,7 +63,8 @@ export function KaryawanClient({ initialData }: KaryawanClientProps) {
     const query = searchQuery.toLowerCase();
     const matchName = (emp.full_name || "").toLowerCase().includes(query);
     const matchUser = emp.username.toLowerCase().includes(query);
-    return matchName || matchUser;
+    const matchEmail = (emp.email || "").toLowerCase().includes(query);
+    return matchName || matchUser || matchEmail;
   });
 
   // Hitung Pagination
@@ -137,7 +138,7 @@ export function KaryawanClient({ initialData }: KaryawanClientProps) {
                 <tr>
                   <td colSpan={5} className="py-12 text-center text-slate-400">
                     <Users className="h-8 w-8 mx-auto mb-2 text-slate-300" />
-                    Belum ada akun karyawan. Klik Tambah Karyawan untuk mendaftarkan staf.
+                    Belum ada akun karyawan. Klik Tambah Karyawan untuk menambahkan.
                   </td>
                 </tr>
               ) : (
@@ -147,7 +148,10 @@ export function KaryawanClient({ initialData }: KaryawanClientProps) {
                       {emp.full_name || "-"}
                     </td>
                     <td className="py-3.5 px-4 text-slate-700">
-                      {emp.username}
+                      <div>{emp.username}</div>
+                      {emp.email && !emp.email.endsWith("@ngeteh-skuyy.internal") && (
+                        <div className="text-xs text-slate-400">{emp.email}</div>
+                      )}
                     </td>
                     <td className="py-3.5 px-4">
                       {emp.is_active ? (
@@ -167,29 +171,31 @@ export function KaryawanClient({ initialData }: KaryawanClientProps) {
                         year: "numeric",
                       })}
                     </td>
-                    <td className="py-3.5 px-4 text-right space-x-1">
-                      <Tooltip content="Reset Password">
-                        <Link
-                          href={`/dashboard/karyawan/${emp.id}/reset-password`}
-                          className="inline-flex items-center justify-center p-1.5 text-slate-600 hover:text-amber-700 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
-                        >
-                          <KeyRound className="h-4 w-4" />
-                        </Link>
-                      </Tooltip>
+                    <td className="py-3.5 px-4 text-right">
+                      <div className="flex items-center justify-end gap-1">
+                        <Tooltip content="Reset Password">
+                          <Link
+                            href={`/dashboard/karyawan/${emp.id}/reset-password`}
+                            className="inline-flex items-center justify-center p-1.5 text-slate-600 hover:text-amber-700 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
+                          >
+                            <KeyRound className="h-4 w-4" />
+                          </Link>
+                        </Tooltip>
 
-                      <Tooltip content={emp.is_active ? "Nonaktifkan Akun" : "Aktifkan Akun"}>
-                        <button
-                          type="button"
-                          onClick={() => setStatusTarget(emp)}
-                          className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
-                            emp.is_active
-                              ? "text-slate-600 hover:text-rose-600 hover:bg-rose-50"
-                              : "text-slate-600 hover:text-emerald-700 hover:bg-emerald-50"
-                          }`}
-                        >
-                          <ShieldAlert className="h-4 w-4" />
-                        </button>
-                      </Tooltip>
+                        <Tooltip content={emp.is_active ? "Nonaktifkan Akun" : "Aktifkan Akun"}>
+                          <button
+                            type="button"
+                            onClick={() => setStatusTarget(emp)}
+                            className={`inline-flex items-center justify-center p-1.5 rounded-lg transition-colors cursor-pointer ${
+                              emp.is_active
+                                ? "text-slate-600 hover:text-rose-600 hover:bg-rose-50"
+                                : "text-slate-600 hover:text-emerald-700 hover:bg-emerald-50"
+                            }`}
+                          >
+                            <ShieldAlert className="h-4 w-4" />
+                          </button>
+                        </Tooltip>
+                      </div>
                     </td>
                   </tr>
                 ))
