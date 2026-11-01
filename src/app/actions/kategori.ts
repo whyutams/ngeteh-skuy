@@ -29,11 +29,11 @@ export async function getKategoriListAction(): Promise<{
   error?: string;
 }> {
   const session = await getCurrentSession();
-  if (!session.isSuperadmin) {
+  if (!session.user) {
     return {
       success: false,
       data: [],
-      error: "Hanya Owner yang dapat mengakses data kategori.",
+      error: "Silakan login terlebih dahulu.",
     };
   }
 

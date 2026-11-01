@@ -3,6 +3,8 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
+import { MenuImage } from "@/components/ui/menu-image";
 import {
   ArrowLeft,
   Save,
@@ -12,6 +14,7 @@ import {
   ArrowDownCircle,
   ArrowUpCircle,
   RefreshCw,
+  CupSoda,
 } from "lucide-react";
 import { Breadcrumbs } from "@/components/dashboard/breadcrumb";
 import { adjustStockAction, type StokActionResult } from "@/app/actions/stok";
@@ -139,10 +142,28 @@ export function PenyesuaianStokForm({
           {/* Sisa Stok Saat Ini Info Card */}
           {selectedProduct && (
             <div className="p-3.5 bg-amber-50/60 border border-amber-200/80 rounded-lg flex items-center justify-between text-sm">
-              <span className="text-slate-700">Stok Saat Ini:</span>
-              <span className="font-bold text-amber-900">
-                {selectedProduct.stok} {selectedProduct.satuan}
-              </span>
+              <div className="flex items-center gap-3">
+                <div className="relative h-11 w-11 rounded-lg overflow-hidden bg-white border border-amber-200 shrink-0 flex items-center justify-center">
+                  <MenuImage
+                    src={selectedProduct.gambar_url}
+                    alt={selectedProduct.nama_produk}
+                    sizes="44px"
+                    iconClassName="h-5 w-5 text-amber-700"
+                  />
+                </div>
+                <div>
+                  <div className="font-semibold text-slate-900">{selectedProduct.nama_produk}</div>
+                  <div className="text-xs text-slate-500">
+                    {selectedProduct.kategori_menu?.nama_kategori || "Menu Teh"}
+                  </div>
+                </div>
+              </div>
+              <div className="text-right">
+                <span className="text-xs text-slate-500 block">Stok Saat Ini</span>
+                <span className="font-bold text-amber-900 text-base">
+                  {selectedProduct.stok} {selectedProduct.satuan}
+                </span>
+              </div>
             </div>
           )}
 

@@ -1,4 +1,6 @@
 import Link from "next/link";
+import Image from "next/image";
+import { MenuImage } from "@/components/ui/menu-image";
 import {
   Calculator,
   FolderTree,
@@ -25,6 +27,15 @@ export default async function DashboardPage() {
   let totalKategori = 0;
   let stokMenipis = 0;
   let totalKaryawan = 0;
+  let recentMenus: Array<{
+    id: string;
+    nama_produk: string;
+    gambar_url: string | null;
+    harga: number;
+    stok: number;
+    satuan: string;
+    kategori_menu?: { nama_kategori: string } | null;
+  }> = [];
 
   try {
     const admin = createAdminClient();
@@ -34,6 +45,7 @@ export default async function DashboardPage() {
       { count: katCount },
       { count: stokCount },
       { count: empCount },
+      { data: menuData },
     ] = await Promise.all([
       admin.from("produk_menu").select("*", { count: "exact", head: true }),
       admin.from("kategori_menu").select("*", { count: "exact", head: true }),
@@ -45,12 +57,19 @@ export default async function DashboardPage() {
         .from("profil_pengguna")
         .select("*", { count: "exact", head: true })
         .eq("role", "karyawan"),
+      admin
+        .from("produk_menu")
+        .select("id, nama_produk, gambar_url, harga, stok, satuan, kategori_menu(nama_kategori)")
+        .eq("status_aktif", true)
+        .order("created_at", { ascending: false })
+        .limit(4),
     ]);
 
     totalMenu = menuCount || 0;
     totalKategori = katCount || 0;
     stokMenipis = stokCount || 0;
     totalKaryawan = empCount || 0;
+    recentMenus = (menuData as unknown as typeof recentMenus) || [];
   } catch {
     // Sembunyikan jika query error
   }
@@ -247,6 +266,68 @@ export default async function DashboardPage() {
                 </p>
               </div>
             </Link>
+          </div>
+        </div>
+      )}
+      {/* Pratinjau Menu Seduhan */}
+      {recentMenus.length > 0 && (
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-base font-bold text-slate-900 tracking-tight">
+                Menu Seduhan Siap Jual
+              </h3>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Katalog produk teh terpopuler di etalase kasir.
+              </p>
+            </div>
+            <Link
+              href="/dashboard/menu"
+              className="text-xs font-semibold text-tea-700 hover:text-tea-800 flex items-center gap-1 cursor-pointer"
+            >
+              <span>Lihat Semua Menu</span>
+              <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            {recentMenus.map((p) => (
+              <div
+                key={p.id}
+                className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-xs hover:border-tea-600 transition-colors flex flex-col justify-between"
+              >
+                <div className="relative aspect-square w-full bg-slate-100 overflow-hidden">
+                  <MenuImage
+                    src={p.gambar_url}
+                    alt={p.nama_produk}
+                    sizes="(max-width: 640px) 50vw, 25vw"
+                    className="object-cover"
+                    iconClassName="h-10 w-10 text-tea-700"
+                  />
+                  {p.kategori_menu && (
+                    <span className="absolute top-2 left-2 bg-slate-900/80 text-white text-[10px] font-medium px-2 py-0.5 rounded-md backdrop-blur-xs">
+                      {Array.isArray(p.kategori_menu)
+                        ? (p.kategori_menu as unknown as Array<{ nama_kategori: string }>)[0]?.nama_kategori
+                        : p.kategori_menu.nama_kategori}
+                    </span>
+                  )}
+                </div>
+
+                <div className="p-3 space-y-1">
+                  <h4 className="text-xs font-semibold text-slate-900 truncate">
+                    {p.nama_produk}
+                  </h4>
+                  <div className="flex items-center justify-between text-xs pt-1 border-t border-slate-100">
+                    <span className="font-bold text-slate-900">
+                      Rp {p.harga.toLocaleString("id-ID")}
+                    </span>
+                    <span className="text-slate-500 text-[11px]">
+                      Stok: {p.stok}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       )}

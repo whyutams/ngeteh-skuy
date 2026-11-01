@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
+import { MenuImage } from "@/components/ui/menu-image";
 import {
   Plus,
   Pencil,
@@ -164,8 +166,18 @@ export function MenuClient({ initialMenus, categories, isOwner }: MenuClientProp
               ) : (
                 paginatedItems.map((item) => (
                   <tr key={item.id} className="hover:bg-slate-50/60 transition-colors">
-                    <td className="py-3.5 px-4 font-semibold text-slate-900">
-                      {item.nama_produk}
+                    <td className="py-3 px-4 font-semibold text-slate-900">
+                      <div className="flex items-center gap-3">
+                        <div className="relative w-11 h-11 rounded-lg overflow-hidden border border-slate-200 shrink-0 bg-slate-100 shadow-2xs flex items-center justify-center">
+                          <MenuImage
+                            src={item.gambar_url}
+                            alt={item.nama_produk}
+                            sizes="44px"
+                            iconClassName="h-5 w-5 text-tea-700"
+                          />
+                        </div>
+                        <span className="truncate">{item.nama_produk}</span>
+                      </div>
                     </td>
                     <td className="py-3.5 px-4">
                       <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-amber-50 text-amber-900 border border-amber-200">

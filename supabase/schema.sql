@@ -108,9 +108,10 @@ create table if not exists public.produk_menu (
   id uuid primary key default gen_random_uuid(),
   kategori_id uuid references public.kategori_menu(id) on delete set null,
   nama_produk text not null,
+  gambar_url text,
   harga numeric not null default 0 check (harga >= 0),
   stok integer not null default 0 check (stok >= 0),
-  satuan text default 'porsi',
+  satuan text default 'cup',
   status_aktif boolean default true,
   created_at timestamptz default now(),
   updated_at timestamptz default now()
@@ -209,7 +210,7 @@ create policy "Pengguna login dapat menambahkan item_pembelian"
   with check (auth.role() = 'authenticated');
 
 -- ------------------------------------------------------------------------------
--- 7. DATA AWAL (Profil Superadmin)
+-- 7. DATA AWAL (Profil Superadmin & Master Data Dummy)
 -- ------------------------------------------------------------------------------
 insert into public.profil_pengguna (id, username, email, role, full_name, is_active)
 values (
@@ -222,3 +223,34 @@ values (
 )
 on conflict (id) do update
 set role = 'superadmin', is_active = true;
+
+-- Kategori Menu Awal
+insert into public.kategori_menu (id, nama_kategori, urutan)
+values
+  ('a1111111-1111-4111-a111-111111111111', 'Teh Klasik', 1),
+  ('b2222222-2222-4222-b222-222222222222', 'Teh Susu & Boba', 2),
+  ('c3333333-3333-4333-c333-333333333333', 'Teh Buah Segar', 3)
+on conflict (id) do update
+set nama_kategori = excluded.nama_kategori, urutan = excluded.urutan;
+
+-- Produk Menu Awal (Gambar tersimpan di Supabase Storage bucket 'menu-produk')
+insert into public.produk_menu (id, kategori_id, nama_produk, gambar_url, harga, stok, satuan, status_aktif)
+values
+  ('c80bb1cb-be18-4afb-b8ec-37e0e5d38dfb', 'a1111111-1111-4111-a111-111111111111', 'Es Teh Manis Jumbo', 'https://rdkysweihuejwnrdywnu.supabase.co/storage/v1/object/public/menu-produk/esteh-original.jpg', 5000, 120, 'cup', true),
+  ('0e305fdc-216f-4870-9205-de8de49a91c1', 'a1111111-1111-4111-a111-111111111111', 'Es Teh Kampoeng Gula Batu', 'https://rdkysweihuejwnrdywnu.supabase.co/storage/v1/object/public/menu-produk/esteh-kampoeng.jpg', 6000, 85, 'cup', true),
+  ('927aaa34-a8cd-414e-a8e3-89212cb4a07e', 'a1111111-1111-4111-a111-111111111111', 'Teh Melati Spesial', 'https://rdkysweihuejwnrdywnu.supabase.co/storage/v1/object/public/menu-produk/esteh-melati.jpg', 7000, 60, 'cup', true),
+  ('b06bdfcb-a785-4cf2-b5ad-55fb26b07fd5', 'b2222222-2222-4222-b222-222222222222', 'Teh Tarik Melaka', 'https://rdkysweihuejwnrdywnu.supabase.co/storage/v1/object/public/menu-produk/teh-tarik.jpg', 12000, 45, 'cup', true),
+  ('b753560a-b06a-45d9-921b-bbe49f63edca', 'b2222222-2222-4222-b222-222222222222', 'Milk Tea Brown Sugar Boba', 'https://rdkysweihuejwnrdywnu.supabase.co/storage/v1/object/public/menu-produk/milk-tea-boba.jpg', 15000, 35, 'cup', true),
+  ('e58ac4df-4455-413c-838e-2bf48494b1ec', 'b2222222-2222-4222-b222-222222222222', 'Matcha Green Tea Latte', 'https://rdkysweihuejwnrdywnu.supabase.co/storage/v1/object/public/menu-produk/matcha-latte.jpg', 16000, 28, 'cup', true),
+  ('e2288217-078a-4bd4-82e4-65b046fb8912', 'c3333333-3333-4333-c333-333333333333', 'Lemon Tea Dingin Segar', 'https://rdkysweihuejwnrdywnu.supabase.co/storage/v1/object/public/menu-produk/lemon-tea.jpg', 9000, 50, 'cup', true),
+  ('b539e224-fed2-4fce-b9ed-2350c0dc3623', 'c3333333-3333-4333-c333-333333333333', 'Lychee Tea Selasih', 'https://rdkysweihuejwnrdywnu.supabase.co/storage/v1/object/public/menu-produk/lychee-tea.jpg', 11000, 40, 'cup', true)
+on conflict (id) do update
+set
+  kategori_id = excluded.kategori_id,
+  nama_produk = excluded.nama_produk,
+  gambar_url = excluded.gambar_url,
+  harga = excluded.harga,
+  stok = excluded.stok,
+  satuan = excluded.satuan,
+  status_aktif = excluded.status_aktif,
+  updated_at = now();

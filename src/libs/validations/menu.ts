@@ -8,6 +8,7 @@ export const menuSchema = z.object({
     .min(2, { message: "Nama produk minimal 2 karakter." })
     .max(80, { message: "Nama produk maksimal 80 karakter." }),
   kategori_id: z.string().uuid({ message: "Kategori tidak valid." }).nullable().optional(),
+  gambar_url: z.string().trim().url({ message: "Format URL gambar tidak valid." }).or(z.literal("")).nullable().optional(),
   harga: z
     .coerce
     .number()

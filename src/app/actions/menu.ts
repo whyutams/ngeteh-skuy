@@ -9,6 +9,7 @@ export interface MenuItem {
   id: string;
   kategori_id: string | null;
   nama_produk: string;
+  gambar_url: string | null;
   harga: number;
   stok: number;
   satuan: string;
@@ -41,7 +42,7 @@ export async function getMenuListAction(): Promise<{
     const admin = createAdminClient();
     const { data, error } = await admin
       .from("produk_menu")
-      .select("id, kategori_id, nama_produk, harga, stok, satuan, status_aktif, created_at, kategori_menu(nama_kategori)")
+      .select("id, kategori_id, nama_produk, gambar_url, harga, stok, satuan, status_aktif, created_at, kategori_menu(nama_kategori)")
       .order("created_at", { ascending: false });
 
     if (error) {
@@ -68,7 +69,7 @@ export async function getMenuByIdAction(id: string): Promise<{
     const admin = createAdminClient();
     const { data, error } = await admin
       .from("produk_menu")
-      .select("id, kategori_id, nama_produk, harga, stok, satuan, status_aktif, created_at, kategori_menu(nama_kategori)")
+      .select("id, kategori_id, nama_produk, gambar_url, harga, stok, satuan, status_aktif, created_at, kategori_menu(nama_kategori)")
       .eq("id", id)
       .maybeSingle();
 
@@ -110,6 +111,7 @@ export async function createMenuAction(
       .insert({
         nama_produk: validation.data.nama_produk,
         kategori_id: validation.data.kategori_id || null,
+        gambar_url: validation.data.gambar_url || null,
         harga: validation.data.harga,
         satuan: validation.data.satuan,
         stok: validation.data.stok,
@@ -170,6 +172,7 @@ export async function updateMenuAction(
       .update({
         nama_produk: validation.data.nama_produk,
         kategori_id: validation.data.kategori_id || null,
+        gambar_url: validation.data.gambar_url || null,
         harga: validation.data.harga,
         satuan: validation.data.satuan,
         status_aktif: validation.data.status_aktif,
@@ -210,6 +213,48 @@ export async function deleteMenuAction(id: string): Promise<MenuActionResult> {
     return { success: true };
   } catch (err) {
     const message = err instanceof Error ? err.message : "Gagal menghapus menu.";
+    return { success: false, error: message };
+  }
+}
+
+// Unggah foto menu ke Supabase Storage (bucket menu-produk)
+export async function uploadMenuImageAction(formData: FormData): Promise<{
+  success: boolean;
+  url?: string;
+  error?: string;
+}> {
+  const session = await getCurrentSession();
+  if (!session.isSuperadmin) {
+    return { success: false, error: "Akses ditolak. Fitur ini khusus Owner." };
+  }
+
+  const file = formData.get("file") as File;
+  if (!file || file.size === 0) {
+    return { success: false, error: "File gambar tidak ditemukan." };
+  }
+
+  try {
+    const admin = createAdminClient();
+    const ext = file.name.split(".").pop() || "jpg";
+    const fileName = `menu-${Date.now()}-${Math.random().toString(36).substring(2, 7)}.${ext}`;
+    const buffer = Buffer.from(await file.arrayBuffer());
+
+    const { error: uploadError } = await admin.storage
+      .from("menu-produk")
+      .upload(fileName, buffer, {
+        contentType: file.type || "image/jpeg",
+        upsert: true,
+      });
+
+    if (uploadError) {
+      return { success: false, error: uploadError.message };
+    }
+
+    const { data } = admin.storage.from("menu-produk").getPublicUrl(fileName);
+    return { success: true, url: data.publicUrl };
+  } catch (err) {
+    const message =
+      err instanceof Error ? err.message : "Gagal mengunggah gambar.";
     return { success: false, error: message };
   }
 }

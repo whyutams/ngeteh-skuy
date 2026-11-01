@@ -17,6 +17,7 @@ export interface StokLogItem {
   produk_menu?: {
     nama_produk: string;
     satuan: string;
+    gambar_url?: string | null;
   } | null;
   profil_pengguna?: {
     full_name: string | null;
@@ -128,7 +129,7 @@ export async function getStokLogListAction(): Promise<{
     const { data, error } = await admin
       .from("riwayat_stok")
       .select(
-        "id, produk_id, tipe_mutasi, jumlah, stok_sebelum, stok_sesudah, catatan, created_at, produk_menu(nama_produk, satuan), profil_pengguna(full_name, username)"
+        "id, produk_id, tipe_mutasi, jumlah, stok_sebelum, stok_sesudah, catatan, created_at, produk_menu(nama_produk, satuan, gambar_url), profil_pengguna(full_name, username)"
       )
       .order("created_at", { ascending: false })
       .limit(100);

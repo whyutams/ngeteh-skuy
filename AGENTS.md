@@ -178,3 +178,11 @@ Dokumen ini adalah aturan utama dan standar baku pengembangan untuk seluruh proy
   - Penulisan commit message wajib sederhana, simple, padat, dan langsung ke inti perubahan (*to the point*).
 - **Merangkum Seluruh Perubahan (*Scope of Changes*)**:
   - Deskripsi commit message wajib merangkum seluruh esensi perubahan file yang terdeteksi oleh git secara padat, natural, dan akurat dalam 1-2 baris.
+
+---
+
+## 14. Standar Penanganan Gambar Produk & Fallback Icon
+- **Fallback Wajib pada Gambar**: Seluruh tampilan gambar produk menu (baik pada kartu menu kasir, tabel menu, tabel stok, riwayat mutasi, preview formulir, maupun ringkasan dashboard) WAJIB memiliki penanganan kondisi jika gambar tidak ada (`null` / kosong) ATAU gambar gagal dimuat (`onError` / network error / URL rusak).
+- **Tampilan Fallback Ikon Minuman**: Jika gambar tidak ada atau gagal dimuat, antarmuka WAJIB menampilkan ikon representatif minuman teh (misal `CupSoda` dari `lucide-react`) dengan latar belakang kontras yang lembut dan rapi (`bg-tea-50 text-tea-700` atau sejenisnya).
+- **Dilarang Membiarkan Gambar Rusak (Broken Image)**: Dilarang membiarkan browser menampilkan ikon patah/rusak (*broken image placeholder*). Seluruh pemuatan gambar wajib memiliki penangkap error (`onError`) yang secara otomatis beralih menampilkan ikon minuman.
+

@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
+import { MenuImage } from "@/components/ui/menu-image";
 import {
   Boxes,
   PlusCircle,
@@ -10,6 +12,7 @@ import {
   ArrowDownCircle,
   ArrowUpCircle,
   RefreshCw,
+  CupSoda,
 } from "lucide-react";
 import { Pagination } from "@/components/ui/pagination";
 import { Tooltip } from "@/components/ui/tooltip";
@@ -165,7 +168,17 @@ export function StokClient({ products, initialLogs, isOwner }: StokClientProps) 
                     paginatedProducts.map((p) => (
                       <tr key={p.id} className="hover:bg-slate-50/60 transition-colors">
                         <td className="py-3.5 px-4 font-semibold text-slate-900">
-                          {p.nama_produk}
+                          <div className="flex items-center gap-3">
+                            <div className="relative h-10 w-10 rounded-lg overflow-hidden bg-tea-50 border border-slate-200 shrink-0 flex items-center justify-center">
+                              <MenuImage
+                                src={p.gambar_url}
+                                alt={p.nama_produk}
+                                sizes="40px"
+                                iconClassName="h-5 w-5 text-tea-700"
+                              />
+                            </div>
+                            <span className="font-semibold text-slate-900">{p.nama_produk}</span>
+                          </div>
                         </td>
                         <td className="py-3.5 px-4 text-xs text-slate-500">
                           {p.kategori_menu?.nama_kategori || "-"}
@@ -267,7 +280,17 @@ export function StokClient({ products, initialLogs, isOwner }: StokClientProps) 
                         })}
                       </td>
                       <td className="py-3 px-4 font-semibold text-slate-900">
-                        {log.produk_menu?.nama_produk || "Produk"}
+                        <div className="flex items-center gap-2.5">
+                          <div className="relative h-8 w-8 rounded-lg overflow-hidden bg-tea-50 border border-slate-200 shrink-0 flex items-center justify-center">
+                            <MenuImage
+                              src={log.produk_menu?.gambar_url}
+                              alt={log.produk_menu?.nama_produk || "Menu"}
+                              sizes="32px"
+                              iconClassName="h-4 w-4 text-tea-700"
+                            />
+                          </div>
+                          <span>{log.produk_menu?.nama_produk || "Produk"}</span>
+                        </div>
                       </td>
                       <td className="py-3 px-4">
                         {log.tipe_mutasi === "masuk" && (

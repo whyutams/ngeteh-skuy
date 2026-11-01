@@ -3,9 +3,15 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Save, Loader2, AlertCircle } from "lucide-react";
+import Image from "next/image";
+import { ArrowLeft, Save, Loader2, AlertCircle, Upload } from "lucide-react";
 import { Breadcrumbs } from "@/components/dashboard/breadcrumb";
-import { updateMenuAction, type MenuActionResult, type MenuItem } from "@/app/actions/menu";
+import {
+  updateMenuAction,
+  uploadMenuImageAction,
+  type MenuActionResult,
+  type MenuItem,
+} from "@/app/actions/menu";
 import type { KategoriItem } from "@/app/actions/kategori";
 
 interface EditMenuFormProps {
@@ -20,11 +26,35 @@ export function EditMenuForm({ initialData, categories }: EditMenuFormProps) {
   const [harga, setHarga] = useState(String(initialData.harga));
   const [satuan, setSatuan] = useState(initialData.satuan);
   const [statusAktif, setStatusAktif] = useState(initialData.status_aktif);
+  const [gambarUrl, setGambarUrl] = useState(initialData.gambar_url || "");
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
 
   const [formState, setFormState] = useState<MenuActionResult | null>(null);
   const [isPending, startTransition] = useTransition();
 
-  const isSubmittable = namaProduk.trim().length >= 2 && Number(harga) > 0 && !isPending;
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploadingImage(true);
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const res = await uploadMenuImageAction(formData);
+    setIsUploadingImage(false);
+
+    if (res.success && res.url) {
+      setGambarUrl(res.url);
+    } else {
+      alert(res.error || "Gagal mengunggah gambar ke Supabase Storage.");
+    }
+  };
+
+  const isSubmittable =
+    namaProduk.trim().length >= 2 &&
+    Number(harga) > 0 &&
+    !isPending &&
+    !isUploadingImage;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,8 +65,9 @@ export function EditMenuForm({ initialData, categories }: EditMenuFormProps) {
       const res = await updateMenuAction(initialData.id, {
         nama_produk: namaProduk.trim(),
         kategori_id: kategoriId || null,
+        gambar_url: gambarUrl || null,
         harga: Number(harga),
-        satuan: satuan.trim() || "porsi",
+        satuan: satuan.trim() || "cup",
         stok: initialData.stok,
         status_aktif: statusAktif,
       });
@@ -113,6 +144,47 @@ export function EditMenuForm({ initialData, categories }: EditMenuFormProps) {
                 {formState.fieldErrors.nama_produk[0]}
               </p>
             )}
+          </div>
+
+          {/* Foto Menu (Opsional - Supabase Storage) */}
+          <div className="space-y-1.5">
+            <label className="block text-sm font-medium text-slate-700">
+              Foto Menu
+            </label>
+            <div className="flex items-center gap-4 p-3 bg-slate-50/60 border border-slate-200 rounded-lg">
+              {gambarUrl ? (
+                <div className="relative w-14 h-14 rounded-lg overflow-hidden border border-slate-200 shrink-0 bg-white">
+                  <Image
+                    src={gambarUrl}
+                    alt="Preview foto menu"
+                    fill
+                    sizes="56px"
+                    className="object-cover"
+                  />
+                </div>
+              ) : (
+                <div className="w-14 h-14 rounded-lg border border-dashed border-slate-300 bg-white flex items-center justify-center text-slate-400 shrink-0">
+                  <Upload className="h-5 w-5" />
+                </div>
+              )}
+              <div className="flex-1 space-y-1">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                  disabled={isUploadingImage}
+                  className="block w-full text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-medium file:bg-tea-100 file:text-tea-800 hover:file:bg-tea-200 cursor-pointer"
+                />
+                <p className="text-[11px] text-slate-400">
+                  Format PNG, JPG, atau WEBP. Gambar disimpan di Supabase Storage.
+                </p>
+                {isUploadingImage && (
+                  <p className="text-xs text-tea-700 flex items-center gap-1 font-medium">
+                    <Loader2 className="h-3 w-3 animate-spin" /> Mengunggah ke Supabase Storage...
+                  </p>
+                )}
+              </div>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
