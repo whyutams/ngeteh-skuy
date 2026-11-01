@@ -153,7 +153,7 @@ export function TambahKaryawanForm() {
             </div>
 
             {/* Email (Tidak wajib diisi / Opsional) */}
-            <div className="sm:col-span-2 space-y-1.5">
+            <div className="space-y-1.5">
               <label htmlFor="email" className="block text-sm font-medium text-slate-700">
                 Email
               </label>
@@ -172,6 +172,9 @@ export function TambahKaryawanForm() {
                 </p>
               )}
             </div>
+
+            {/* Kolom kosong agar field email tetap berukuran 1 kolom dan Password berada di baris berikutnya */}
+            <div className="hidden sm:block" aria-hidden="true" />
 
             {/* Password */}
             <div className="space-y-1.5">
