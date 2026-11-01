@@ -5,7 +5,7 @@ import { KategoriClient } from "@/components/dashboard/kategori/kategori-client"
 import { APP_NAME } from "@/libs/constants";
 
 export const metadata = {
-  title: `Kategori Menu - ${APP_NAME}`,
+  title: "Kategori Menu",
 };
 
 export default async function KategoriPage() {

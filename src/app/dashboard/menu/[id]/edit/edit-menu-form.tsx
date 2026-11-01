@@ -23,6 +23,7 @@ export function EditMenuForm({ initialData, categories }: EditMenuFormProps) {
   const router = useRouter();
   const [namaProduk, setNamaProduk] = useState(initialData.nama_produk);
   const [kategoriId, setKategoriId] = useState(initialData.kategori_id || "");
+  const [hargaModal, setHargaModal] = useState(String(initialData.harga_modal ?? 0));
   const [harga, setHarga] = useState(String(initialData.harga));
   const [satuan, setSatuan] = useState(initialData.satuan);
   const [statusAktif, setStatusAktif] = useState(initialData.status_aktif);
@@ -53,6 +54,7 @@ export function EditMenuForm({ initialData, categories }: EditMenuFormProps) {
   const isSubmittable =
     namaProduk.trim().length >= 2 &&
     Number(harga) > 0 &&
+    Number(hargaModal) >= 0 &&
     !isPending &&
     !isUploadingImage;
 
@@ -66,6 +68,7 @@ export function EditMenuForm({ initialData, categories }: EditMenuFormProps) {
         nama_produk: namaProduk.trim(),
         kategori_id: kategoriId || null,
         gambar_url: gambarUrl || null,
+        harga_modal: Number(hargaModal) || 0,
         harga: Number(harga),
         satuan: satuan.trim() || "cup",
         stok: initialData.stok,
@@ -214,6 +217,29 @@ export function EditMenuForm({ initialData, categories }: EditMenuFormProps) {
               )}
             </div>
 
+            {/* Harga Modal (HPP) */}
+            <div className="space-y-1.5">
+              <label htmlFor="harga_modal" className="block text-sm font-medium text-slate-700">
+                Harga Modal (HPP) <span className="text-rose-500 ml-0.5">*</span>
+              </label>
+              <input
+                id="harga_modal"
+                name="harga_modal"
+                type="number"
+                min={0}
+                value={hargaModal}
+                onChange={(e) => setHargaModal(e.target.value)}
+                placeholder="Masukkan harga modal"
+                className="w-full bg-slate-50/60 border border-slate-200 rounded-lg py-2.5 px-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                required
+              />
+              {formState?.fieldErrors?.harga_modal && (
+                <p className="text-rose-500 text-xs mt-1">
+                  {formState.fieldErrors.harga_modal[0]}
+                </p>
+              )}
+            </div>
+
             {/* Harga Jual */}
             <div className="space-y-1.5">
               <label htmlFor="harga" className="block text-sm font-medium text-slate-700">
@@ -226,7 +252,7 @@ export function EditMenuForm({ initialData, categories }: EditMenuFormProps) {
                 min={0}
                 value={harga}
                 onChange={(e) => setHarga(e.target.value)}
-                placeholder="Masukkan harga"
+                placeholder="Masukkan harga jual"
                 className="w-full bg-slate-50/60 border border-slate-200 rounded-lg py-2.5 px-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
                 required
               />
@@ -236,6 +262,27 @@ export function EditMenuForm({ initialData, categories }: EditMenuFormProps) {
                 </p>
               )}
             </div>
+
+            {/* Estimasi Keuntungan & Margin per Cup */}
+            {Number(harga) > 0 && (
+              <div className="sm:col-span-2 p-3 bg-emerald-50 border border-emerald-200 rounded-lg flex items-center justify-between text-xs">
+                <div>
+                  <span className="font-semibold text-emerald-900">
+                    Estimasi Keuntungan per Porsi:
+                  </span>
+                  <span className="ml-1 text-emerald-800">
+                    Rp {(Number(harga) - (Number(hargaModal) || 0)).toLocaleString("id-ID")}
+                  </span>
+                </div>
+                <div className="font-bold text-emerald-800">
+                  Margin:{" "}
+                  {Math.round(
+                    ((Number(harga) - (Number(hargaModal) || 0)) / Number(harga)) * 100
+                  )}
+                  %
+                </div>
+              </div>
+            )}
 
             {/* Satuan */}
             <div className="space-y-1.5 sm:col-span-2">

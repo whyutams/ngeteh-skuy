@@ -147,7 +147,13 @@ export function MenuClient({ initialMenus, categories, isOwner }: MenuClientProp
               <tr>
                 <th scope="col" className="py-3 px-4">Nama Menu</th>
                 <th scope="col" className="py-3 px-4">Kategori</th>
-                <th scope="col" className="py-3 px-4">Harga Jual</th>
+                {isOwner && (
+                  <th scope="col" className="py-3 px-4 text-right">Harga Modal</th>
+                )}
+                <th scope="col" className="py-3 px-4 text-right">Harga Jual</th>
+                {isOwner && (
+                  <th scope="col" className="py-3 px-4 text-right">Untung / Cup</th>
+                )}
                 <th scope="col" className="py-3 px-4">Sisa Stok</th>
                 <th scope="col" className="py-3 px-4">Status</th>
                 {isOwner && (
@@ -158,7 +164,7 @@ export function MenuClient({ initialMenus, categories, isOwner }: MenuClientProp
             <tbody className="divide-y divide-slate-100">
               {paginatedItems.length === 0 ? (
                 <tr>
-                  <td colSpan={isOwner ? 6 : 5} className="py-12 text-center text-slate-400">
+                  <td colSpan={isOwner ? 8 : 5} className="py-12 text-center text-slate-400">
                     <CupSoda className="h-8 w-8 mx-auto mb-2 text-slate-300" />
                     Belum ada menu yang sesuai.
                   </td>
@@ -184,9 +190,21 @@ export function MenuClient({ initialMenus, categories, isOwner }: MenuClientProp
                         {item.kategori_menu?.nama_kategori || "Tanpa Kategori"}
                       </span>
                     </td>
-                    <td className="py-3.5 px-4 font-medium text-slate-900">
+                    {isOwner && (
+                      <td className="py-3.5 px-4 text-right text-xs text-slate-500 whitespace-nowrap">
+                        Rp {(item.harga_modal ?? 0).toLocaleString("id-ID")}
+                      </td>
+                    )}
+                    <td className="py-3.5 px-4 text-right font-medium text-slate-900 whitespace-nowrap">
                       Rp {item.harga.toLocaleString("id-ID")}
                     </td>
+                    {isOwner && (
+                      <td className="py-3.5 px-4 text-right whitespace-nowrap">
+                        <span className="font-semibold text-emerald-700 text-xs">
+                          Rp {(item.harga - (item.harga_modal ?? 0)).toLocaleString("id-ID")}
+                        </span>
+                      </td>
+                    )}
                     <td className="py-3.5 px-4">
                       <span
                         className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold ${

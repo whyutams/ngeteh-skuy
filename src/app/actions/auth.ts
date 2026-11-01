@@ -66,7 +66,7 @@ export async function loginAction(
   if (!targetEmail) {
     const admin = createAdminClient();
 
-    // 1. Coba cari di tabel database profil_pengguna
+    // cari di tabel profil pengguna
     try {
       const { data: profile } = await admin
         .from("profil_pengguna")
@@ -78,11 +78,10 @@ export async function loginAction(
         targetEmail = profile.email;
       }
     } catch {
-      // Abaikan jika tabel belum siap
+      // abaikan jika tabel belum siap
     }
 
-    // 2. Jika tidak ditemukan (misal email baru diubah di profil atau tabel belum dibuat),
-    // cocokkan dengan username pada data auth Supabase
+    // fallback jika belum sinkron di database
     if (!targetEmail) {
       try {
         const { data: authData } = await admin.auth.admin.listUsers();

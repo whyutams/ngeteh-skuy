@@ -43,7 +43,7 @@ export async function updateProfileAction(
   const admin = createAdminClient();
 
   try {
-    // 1. Perbarui kredensial dan metadata di auth.users terlebih dahulu
+    // perbarui data di auth
     const updateAuthPayload: {
       email?: string;
       email_confirm?: boolean;
@@ -59,7 +59,7 @@ export async function updateProfileAction(
       },
     };
 
-    // Jika pengguna memasukkan password baru
+    // jika password diubah
     if (password && password.length >= 8) {
       updateAuthPayload.password = password;
     }
@@ -83,7 +83,7 @@ export async function updateProfileAction(
       };
     }
 
-    // 2. Sinkronkan ke tabel profil_pengguna jika tabel sudah siap di database
+    // sinkronkan ke tabel profil pengguna
     try {
       const { error: dbError } = await admin
         .from("profil_pengguna")

@@ -109,6 +109,7 @@ create table if not exists public.produk_menu (
   kategori_id uuid references public.kategori_menu(id) on delete set null,
   nama_produk text not null,
   gambar_url text,
+  harga_modal numeric not null default 0 check (harga_modal >= 0),
   harga numeric not null default 0 check (harga >= 0),
   stok integer not null default 0 check (stok >= 0),
   satuan text default 'cup',

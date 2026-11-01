@@ -5,7 +5,7 @@ import { StokClient } from "@/components/dashboard/stok/stok-client";
 import { APP_NAME } from "@/libs/constants";
 
 export const metadata = {
-  title: `Kelola Stok - ${APP_NAME}`,
+  title: "Kelola Stok",
 };
 
 export default async function StokPage() {

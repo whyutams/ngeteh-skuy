@@ -1,11 +1,11 @@
 import { redirect } from "next/navigation";
-import { BarChart3 } from "lucide-react";
-import { Breadcrumbs } from "@/components/dashboard/breadcrumb";
 import { getCurrentSession } from "@/libs/auth-session";
+import { getLaporanPenjualanAction } from "@/app/actions/transaksi";
+import { LaporanClient } from "@/components/dashboard/laporan/laporan-client";
 import { APP_NAME } from "@/libs/constants";
 
 export const metadata = {
-  title: `Laporan Penjualan - ${APP_NAME}`,
+  title: "Laporan Penjualan",
 };
 
 export default async function LaporanPage() {
@@ -16,29 +16,25 @@ export default async function LaporanPage() {
     redirect("/dashboard");
   }
 
+  const { data: laporanData } = await getLaporanPenjualanAction();
+
   return (
-    <div className="space-y-6 w-full">
-      <Breadcrumbs items={[{ label: "Laporan Penjualan" }]} />
-
-      <div className="p-5 bg-white rounded-xl border border-slate-200 shadow-xs">
-        <h2 className="text-xl font-bold text-slate-900 tracking-tight">
-          Laporan Penjualan
-        </h2>
-        <p className="text-sm text-slate-500 mt-1">
-          Rekapitulasi omset, metode pembayaran, dan produk teh terlaris.
-        </p>
-      </div>
-
-      <div className="p-12 bg-white rounded-xl border border-slate-200 shadow-xs text-center space-y-3">
-        <BarChart3 className="h-12 w-12 text-tea-700 mx-auto" />
-        <h3 className="text-lg font-semibold text-slate-900">
-          Laporan Omset & Penjualan
-        </h3>
-        <p className="text-sm text-slate-500 max-w-md mx-auto">
-          Grafik dan rekapitulasi data penjualan periodik (harian, mingguan, bulanan) khusus untuk Owner.
-        </p>
-      </div>
-    </div>
+    <LaporanClient
+      initialData={
+        laporanData || {
+          totalPendapatan: 0,
+          totalTransaksi: 0,
+          rataRataTransaksi: 0,
+          totalItemTerjual: 0,
+          metodeBreakdown: {
+            tunai: { total: 0, jumlah: 0 },
+            qris: { total: 0, jumlah: 0 },
+            transfer: { total: 0, jumlah: 0 },
+          },
+          produkTerlaris: [],
+          transaksiList: [],
+        }
+      }
+    />
   );
 }
-

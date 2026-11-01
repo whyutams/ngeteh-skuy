@@ -5,7 +5,7 @@ import { ResetPasswordForm } from "./reset-password-form";
 import { APP_NAME } from "@/libs/constants";
 
 export const metadata = {
-  title: `Reset Password Karyawan - ${APP_NAME}`,
+  title: "Reset Password Karyawan",
 };
 
 interface ResetPasswordPageProps {

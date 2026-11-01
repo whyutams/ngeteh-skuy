@@ -21,6 +21,7 @@ export function TambahMenuForm({ categories }: TambahMenuFormProps) {
   const router = useRouter();
   const [namaProduk, setNamaProduk] = useState("");
   const [kategoriId, setKategoriId] = useState("");
+  const [hargaModal, setHargaModal] = useState("");
   const [harga, setHarga] = useState("");
   const [stok, setStok] = useState("0");
   const [satuan, setSatuan] = useState("cup");
@@ -52,6 +53,7 @@ export function TambahMenuForm({ categories }: TambahMenuFormProps) {
   const isSubmittable =
     namaProduk.trim().length >= 2 &&
     Number(harga) > 0 &&
+    Number(hargaModal) >= 0 &&
     !isPending &&
     !isUploadingImage;
 
@@ -65,6 +67,7 @@ export function TambahMenuForm({ categories }: TambahMenuFormProps) {
         nama_produk: namaProduk.trim(),
         kategori_id: kategoriId || null,
         gambar_url: gambarUrl || null,
+        harga_modal: Number(hargaModal) || 0,
         harga: Number(harga),
         satuan: satuan.trim() || "cup",
         stok: Number(stok) || 0,
@@ -213,6 +216,29 @@ export function TambahMenuForm({ categories }: TambahMenuFormProps) {
               )}
             </div>
 
+            {/* Harga Modal (HPP) */}
+            <div className="space-y-1.5">
+              <label htmlFor="harga_modal" className="block text-sm font-medium text-slate-700">
+                Harga Modal (HPP) <span className="text-rose-500 ml-0.5">*</span>
+              </label>
+              <input
+                id="harga_modal"
+                name="harga_modal"
+                type="number"
+                min={0}
+                value={hargaModal}
+                onChange={(e) => setHargaModal(e.target.value)}
+                placeholder="Masukkan harga modal"
+                className="w-full bg-slate-50/60 border border-slate-200 rounded-lg py-2.5 px-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                required
+              />
+              {formState?.fieldErrors?.harga_modal && (
+                <p className="text-rose-500 text-xs mt-1">
+                  {formState.fieldErrors.harga_modal[0]}
+                </p>
+              )}
+            </div>
+
             {/* Harga Jual */}
             <div className="space-y-1.5">
               <label htmlFor="harga" className="block text-sm font-medium text-slate-700">
@@ -225,7 +251,7 @@ export function TambahMenuForm({ categories }: TambahMenuFormProps) {
                 min={0}
                 value={harga}
                 onChange={(e) => setHarga(e.target.value)}
-                placeholder="Masukkan harga"
+                placeholder="Masukkan harga jual"
                 className="w-full bg-slate-50/60 border border-slate-200 rounded-lg py-2.5 px-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
                 required
               />
@@ -235,6 +261,27 @@ export function TambahMenuForm({ categories }: TambahMenuFormProps) {
                 </p>
               )}
             </div>
+
+            {/* Estimasi Keuntungan & Margin per Cup */}
+            {Number(harga) > 0 && (
+              <div className="sm:col-span-2 p-3 bg-emerald-50 border border-emerald-200 rounded-lg flex items-center justify-between text-xs">
+                <div>
+                  <span className="font-semibold text-emerald-900">
+                    Estimasi Keuntungan per Porsi:
+                  </span>
+                  <span className="ml-1 text-emerald-800">
+                    Rp {(Number(harga) - (Number(hargaModal) || 0)).toLocaleString("id-ID")}
+                  </span>
+                </div>
+                <div className="font-bold text-emerald-800">
+                  Margin:{" "}
+                  {Math.round(
+                    ((Number(harga) - (Number(hargaModal) || 0)) / Number(harga)) * 100
+                  )}
+                  %
+                </div>
+              </div>
+            )}
 
             {/* Stok Awal */}
             <div className="space-y-1.5">

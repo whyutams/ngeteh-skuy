@@ -5,7 +5,7 @@ import { EditKategoriForm } from "./edit-kategori-form";
 import { APP_NAME } from "@/libs/constants";
 
 export const metadata = {
-  title: `Ubah Kategori - ${APP_NAME}`,
+  title: "Ubah Kategori",
 };
 
 interface EditKategoriPageProps {

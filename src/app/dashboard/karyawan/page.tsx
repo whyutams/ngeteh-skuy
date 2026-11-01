@@ -5,7 +5,7 @@ import { KaryawanClient } from "@/components/dashboard/karyawan/karyawan-client"
 import { APP_NAME } from "@/libs/constants";
 
 export const metadata = {
-  title: `Kelola Karyawan - ${APP_NAME}`,
+  title: "Kelola Karyawan",
 };
 
 export default async function KaryawanPage() {

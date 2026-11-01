@@ -21,12 +21,12 @@ export const metadata: Metadata = {
   description: `Aplikasi kasir dan manajemen operasional ${APP_NAME}.`,
   icons: {
     icon: [
-      { url: "/img/logo-web.png" },
-      { url: "/img/logo-web.png", sizes: "192x192", type: "image/png" },
-      { url: "/img/logo-web.png", sizes: "512x512", type: "image/png" },
+      { url: "/img/logo-circle.png" },
+      { url: "/img/logo-circle.png", sizes: "192x192", type: "image/png" },
+      { url: "/img/logo-circle.png", sizes: "512x512", type: "image/png" },
     ],
-    shortcut: "/img/logo-web.png",
-    apple: "/img/logo-web.png",
+    shortcut: "/img/logo-circle.png",
+    apple: "/img/logo-circle.png",
   },
   openGraph: {
     title: APP_NAME,
@@ -52,8 +52,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="id" className={`${notoSans.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col font-sans bg-slate-50 text-slate-900">
+    <html lang="id" className={`${notoSans.variable} h-full antialiased`} suppressHydrationWarning>
+      <body className="min-h-full flex flex-col font-sans bg-slate-50 text-slate-900" suppressHydrationWarning>
         <NextTopLoader
           color="#f59e0b"
           initialPosition={0.08}

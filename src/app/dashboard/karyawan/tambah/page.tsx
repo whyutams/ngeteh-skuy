@@ -4,7 +4,7 @@ import { TambahKaryawanForm } from "./tambah-karyawan-form";
 import { APP_NAME } from "@/libs/constants";
 
 export const metadata = {
-  title: `Tambah Karyawan - ${APP_NAME}`,
+  title: "Tambah Karyawan",
 };
 
 export default async function TambahKaryawanPage() {

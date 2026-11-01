@@ -57,3 +57,38 @@ select:disabled {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+/* Aturan Cetak / Ekspor PDF */
+@media print {
+  aside,
+  header,
+  nav,
+  .print-hidden {
+    display: none !important;
+  }
+
+  body,
+  html,
+  main {
+    overflow: visible !important;
+    height: auto !important;
+    background: white !important;
+    color: black !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  .print-only {
+    display: block !important;
+  }
+
+  .print-break-inside-avoid {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}
+
+.print-only {
+  display: none;
+}
+

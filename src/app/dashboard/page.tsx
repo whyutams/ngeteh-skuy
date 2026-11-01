@@ -16,7 +16,7 @@ import { createAdminClient } from "@/libs/supabase/admin";
 import { APP_NAME } from "@/libs/constants";
 
 export const metadata = {
-  title: `Dashboard - ${APP_NAME}`,
+  title: "Dashboard",
 };
 
 export default async function DashboardPage() {

@@ -6,7 +6,7 @@ import { EditMenuForm } from "./edit-menu-form";
 import { APP_NAME } from "@/libs/constants";
 
 export const metadata = {
-  title: `Ubah Menu - ${APP_NAME}`,
+  title: "Ubah Menu",
 };
 
 interface EditMenuPageProps {

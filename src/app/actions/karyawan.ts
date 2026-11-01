@@ -52,7 +52,7 @@ export async function getKaryawanListAction(): Promise<{
     let karyawanList: KaryawanItem[] = [];
     let shouldFallback = false;
 
-    // 1. Coba ambil dari tabel profil_pengguna
+    // ambil dari tabel profil pengguna
     try {
       const { data, error } = await admin
         .from("profil_pengguna")
@@ -71,7 +71,7 @@ export async function getKaryawanListAction(): Promise<{
       shouldFallback = true;
     }
 
-    // 2. Fallback: Ambil langsung dari Supabase Auth metadata jika tabel belum ada atau kosong
+    // fallback langsung dari data auth jika tabel kosong
     if (shouldFallback) {
       const { data: authData, error: authErr } = await admin.auth.admin.listUsers({
         perPage: 1000,
@@ -138,7 +138,7 @@ export async function getKaryawanByIdAction(id: string): Promise<{
   try {
     const admin = createAdminClient();
 
-    // 1. Coba ambil dari tabel profil_pengguna
+    // ambil dari tabel profil pengguna
     try {
       const { data, error } = await admin
         .from("profil_pengguna")
@@ -151,10 +151,10 @@ export async function getKaryawanByIdAction(id: string): Promise<{
         return { success: true, data };
       }
     } catch {
-      // Abaikan jika tabel profil_pengguna belum tersedia
+      // abaikan jika tabel profil belum tersedia
     }
 
-    // 2. Fallback: Cari di Supabase Auth
+    // fallback cari di auth
     const { data: userData, error: userErr } =
       await admin.auth.admin.getUserById(id);
 
@@ -225,7 +225,7 @@ export async function createKaryawanAction(
   try {
     const admin = createAdminClient();
 
-    // 1. Buat akun di Supabase Auth
+    // buat akun di auth
     const { data: authData, error: authErr } =
       await admin.auth.admin.createUser({
         email: authEmail,
@@ -260,7 +260,7 @@ export async function createKaryawanAction(
       };
     }
 
-    // 2. Sinkronkan ke tabel profil_pengguna jika tabel sudah siap
+    // sinkronkan ke tabel profil pengguna
     try {
       const { error: profileErr } = await admin.from("profil_pengguna").upsert(
         {

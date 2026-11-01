@@ -5,7 +5,7 @@ import { TambahMenuForm } from "./tambah-menu-form";
 import { APP_NAME } from "@/libs/constants";
 
 export const metadata = {
-  title: `Tambah Menu - ${APP_NAME}`,
+  title: "Tambah Menu",
 };
 
 export default async function TambahMenuPage() {

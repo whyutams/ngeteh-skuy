@@ -11,6 +11,7 @@ export interface MenuItem {
   nama_produk: string;
   gambar_url: string | null;
   harga: number;
+  harga_modal: number;
   stok: number;
   satuan: string;
   status_aktif: boolean;
@@ -27,6 +28,7 @@ export interface MenuActionResult {
     nama_produk?: string[];
     kategori_id?: string[];
     harga?: string[];
+    harga_modal?: string[];
     satuan?: string[];
     stok?: string[];
   };
@@ -40,10 +42,20 @@ export async function getMenuListAction(): Promise<{
 }> {
   try {
     const admin = createAdminClient();
-    const { data, error } = await admin
+    let { data, error } = await admin
       .from("produk_menu")
-      .select("id, kategori_id, nama_produk, gambar_url, harga, stok, satuan, status_aktif, created_at, kategori_menu(nama_kategori)")
+      .select("id, kategori_id, nama_produk, gambar_url, harga, harga_modal, stok, satuan, status_aktif, created_at, kategori_menu(nama_kategori)")
       .order("created_at", { ascending: false });
+
+    // Fallback jika kolom harga_modal belum dibuat di database Supabase
+    if (error && error.message.includes("harga_modal")) {
+      const fallback = await admin
+        .from("produk_menu")
+        .select("id, kategori_id, nama_produk, gambar_url, harga, stok, satuan, status_aktif, created_at, kategori_menu(nama_kategori)")
+        .order("created_at", { ascending: false });
+      data = (fallback.data as any[])?.map((row) => ({ ...row, harga_modal: 0 })) || [];
+      error = fallback.error;
+    }
 
     if (error) {
       return { success: false, data: [], error: error.message };
@@ -67,11 +79,22 @@ export async function getMenuByIdAction(id: string): Promise<{
 }> {
   try {
     const admin = createAdminClient();
-    const { data, error } = await admin
+    let { data, error } = await admin
       .from("produk_menu")
-      .select("id, kategori_id, nama_produk, gambar_url, harga, stok, satuan, status_aktif, created_at, kategori_menu(nama_kategori)")
+      .select("id, kategori_id, nama_produk, gambar_url, harga, harga_modal, stok, satuan, status_aktif, created_at, kategori_menu(nama_kategori)")
       .eq("id", id)
       .maybeSingle();
+
+    // Fallback jika kolom harga_modal belum dibuat di database Supabase
+    if (error && error.message.includes("harga_modal")) {
+      const fallback = await admin
+        .from("produk_menu")
+        .select("id, kategori_id, nama_produk, gambar_url, harga, stok, satuan, status_aktif, created_at, kategori_menu(nama_kategori)")
+        .eq("id", id)
+        .maybeSingle();
+      data = fallback.data ? { ...fallback.data, harga_modal: 0 } as any : null;
+      error = fallback.error;
+    }
 
     if (error) {
       return { success: false, data: null, error: error.message };
@@ -106,19 +129,34 @@ export async function createMenuAction(
 
   try {
     const admin = createAdminClient();
-    const { data: newProd, error } = await admin
+    const payload: Record<string, any> = {
+      nama_produk: validation.data.nama_produk,
+      kategori_id: validation.data.kategori_id || null,
+      gambar_url: validation.data.gambar_url || null,
+      harga: validation.data.harga,
+      harga_modal: validation.data.harga_modal ?? 0,
+      satuan: validation.data.satuan,
+      stok: validation.data.stok,
+      status_aktif: validation.data.status_aktif,
+    };
+
+    let { data: newProd, error } = await admin
       .from("produk_menu")
-      .insert({
-        nama_produk: validation.data.nama_produk,
-        kategori_id: validation.data.kategori_id || null,
-        gambar_url: validation.data.gambar_url || null,
-        harga: validation.data.harga,
-        satuan: validation.data.satuan,
-        stok: validation.data.stok,
-        status_aktif: validation.data.status_aktif,
-      })
+      .insert(payload)
       .select("id")
       .single();
+
+    // Fallback jika kolom harga_modal belum ada di tabel database
+    if (error && error.message.includes("harga_modal")) {
+      delete payload.harga_modal;
+      const retry = await admin
+        .from("produk_menu")
+        .insert(payload)
+        .select("id")
+        .single();
+      newProd = retry.data;
+      error = retry.error;
+    }
 
     if (error || !newProd) {
       return { success: false, error: error?.message || "Gagal menyimpan menu." };
@@ -140,6 +178,7 @@ export async function createMenuAction(
     revalidatePath("/dashboard/menu");
     revalidatePath("/dashboard/stok");
     revalidatePath("/dashboard/kasir");
+    revalidatePath("/dashboard/laporan");
     return { success: true };
   } catch (err) {
     const message = err instanceof Error ? err.message : "Gagal menyimpan menu.";
@@ -167,17 +206,30 @@ export async function updateMenuAction(
 
   try {
     const admin = createAdminClient();
-    const { error } = await admin
+    const payload: Record<string, any> = {
+      nama_produk: validation.data.nama_produk,
+      kategori_id: validation.data.kategori_id || null,
+      gambar_url: validation.data.gambar_url || null,
+      harga: validation.data.harga,
+      harga_modal: validation.data.harga_modal ?? 0,
+      satuan: validation.data.satuan,
+      status_aktif: validation.data.status_aktif,
+    };
+
+    let { error } = await admin
       .from("produk_menu")
-      .update({
-        nama_produk: validation.data.nama_produk,
-        kategori_id: validation.data.kategori_id || null,
-        gambar_url: validation.data.gambar_url || null,
-        harga: validation.data.harga,
-        satuan: validation.data.satuan,
-        status_aktif: validation.data.status_aktif,
-      })
+      .update(payload)
       .eq("id", id);
+
+    // Fallback jika kolom harga_modal belum ada di tabel database
+    if (error && error.message.includes("harga_modal")) {
+      delete payload.harga_modal;
+      const retry = await admin
+        .from("produk_menu")
+        .update(payload)
+        .eq("id", id);
+      error = retry.error;
+    }
 
     if (error) {
       return { success: false, error: error.message };
@@ -185,6 +237,7 @@ export async function updateMenuAction(
 
     revalidatePath("/dashboard/menu");
     revalidatePath("/dashboard/kasir");
+    revalidatePath("/dashboard/laporan");
     return { success: true };
   } catch (err) {
     const message = err instanceof Error ? err.message : "Gagal memperbarui menu.";

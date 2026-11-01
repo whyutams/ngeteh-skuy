@@ -12,7 +12,12 @@ export const menuSchema = z.object({
   harga: z
     .coerce
     .number()
-    .min(0, { message: "Harga tidak boleh bernilai negatif." }),
+    .min(0, { message: "Harga jual tidak boleh bernilai negatif." }),
+  harga_modal: z
+    .coerce
+    .number()
+    .min(0, { message: "Harga modal tidak boleh bernilai negatif." })
+    .default(0),
   satuan: z.string().trim().default("cup"),
   stok: z
     .coerce

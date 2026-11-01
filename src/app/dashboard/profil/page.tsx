@@ -4,7 +4,7 @@ import { ProfilClient } from "@/components/dashboard/profil/profil-client";
 import { APP_NAME } from "@/libs/constants";
 
 export const metadata = {
-  title: `Profil Akun - ${APP_NAME}`,
+  title: "Profil Akun",
 };
 
 export default async function ProfilPage() {

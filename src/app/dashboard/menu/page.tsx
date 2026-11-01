@@ -5,7 +5,7 @@ import { MenuClient } from "@/components/dashboard/menu/menu-client";
 import { APP_NAME } from "@/libs/constants";
 
 export const metadata = {
-  title: `Data Menu - ${APP_NAME}`,
+  title: "Data Menu",
 };
 
 export default async function MenuPage() {

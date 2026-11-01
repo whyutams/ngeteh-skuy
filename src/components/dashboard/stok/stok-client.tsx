@@ -271,7 +271,7 @@ export function StokClient({ products, initialLogs, isOwner }: StokClientProps) 
                 ) : (
                   paginatedLogs.map((log) => (
                     <tr key={log.id} className="hover:bg-slate-50/60 transition-colors">
-                      <td className="py-3 px-4 text-xs text-slate-500 whitespace-nowrap">
+                      <td suppressHydrationWarning className="py-3 px-4 text-xs text-slate-500 whitespace-nowrap">
                         {new Date(log.created_at).toLocaleString("id-ID", {
                           day: "numeric",
                           month: "short",

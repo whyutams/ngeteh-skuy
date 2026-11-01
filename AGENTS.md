@@ -108,9 +108,11 @@ Dokumen ini adalah aturan utama dan standar baku pengembangan untuk seluruh proy
 
 ## 9. Bahasa & Gaya Penulisan Komentar Kode (Code Comments)
 - Komentar kode ditulis dalam **Bahasa Indonesia**.
-- Komentar harus dibuat **sederhana, simple, dan secukupnya** (*to the point*).
-- **Dilarang membuat komentar bertingkat atau poin-poin penomoran** (`1.`, `2.`, dst).
-- Hindari komentar bertele-tele atau menjelaskan hal yang sudah jelas terbaca dari nama fungsi/variabel.
+- **Huruf kecil jika bukan istilah**: Teks komentar wajib dibuat sesederhana mungkin dengan huruf kecil semua (`lowercase`) untuk kata umum (contoh: `// filter data menu`, `// format tanggal yyyy-mm-dd`). Huruf besar hanya diizinkan untuk istilah teknis spesifik atau nama brand (seperti `PDF`, `Excel`, `QRIS`, `POS`, `Ngeteh Skuyy`).
+- **Simpel, sederhana, dan to the point**: Tulis komentar yang sangat ringkas, padat, dan langsung ke inti logika.
+- **DILARANG KERAS KOMENTAR BANNER DEKORATIF**: Dilarang keras membuat komentar berbingkai garis panjang dekoratif (seperti `/* =====...===== */`, `/* -----...----- */`, garis ASCII, atau tanda pagar berulang `###`).
+- **DILARANG KOMENTAR BERTINGKAT / POIN-POIN**: Dilarang membuat komentar bernomor (`1.`, `2.`, dst) maupun bullet list di dalam kode.
+- **Hindari komentar redundan**: Dilarang memberi komentar pada hal yang sudah sangat jelas terbaca langsung dari nama fungsi atau variabel.
 
 ---
 

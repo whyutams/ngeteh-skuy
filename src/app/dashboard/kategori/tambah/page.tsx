@@ -4,7 +4,7 @@ import { TambahKategoriForm } from "./tambah-kategori-form";
 import { APP_NAME } from "@/libs/constants";
 
 export const metadata = {
-  title: `Tambah Kategori - ${APP_NAME}`,
+  title: "Tambah Kategori",
 };
 
 export default async function TambahKategoriPage() {
