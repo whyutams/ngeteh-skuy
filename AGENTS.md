@@ -96,6 +96,9 @@ Dokumen ini adalah aturan utama dan standar baku pengembangan untuk seluruh proy
   - Pisahkan strictly antara kredensial publik (`NEXT_PUBLIC_`) dan rahasia internal server.
 - **Row Level Security (RLS)**:
   - Pada proyek dengan PostgreSQL / Supabase, Row Level Security (RLS) WAJIB diaktifkan di seluruh tabel tanpa terkecuali. Pastikan kebijakan (policies) memastikan isolasi data per pengguna atau per tenant.
+- **Standar Penamaan Tabel Database**:
+  - DILARANG KERAS menggunakan penamaan tabel yang FULL BAHASA INGGRIS (contoh: dilarang memakai `order_items`, `products`, `users`, `categories`, `stock_logs`).
+  - Penamaan tabel WAJIB menggunakan Bahasa Indonesia atau campuran Bahasa Indonesia dan Bahasa Inggris yang deskriptif (contoh: `kategori_menu`, `produk_menu`, `riwayat_stok`, `transaksi_penjualan`, `item_pembelian`, `profil_pengguna`).
 
 ---
 

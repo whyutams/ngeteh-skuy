@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "seed": "node scripts/seed-superadmin.mjs",
     "seed:admin": "node scripts/seed-superadmin.mjs",
     "build": "next build",
     "start": "next start",

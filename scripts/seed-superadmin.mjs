@@ -88,20 +88,21 @@ async function seed() {
   }
 
   try {
-    const { error: profileError } = await supabase.from("profiles").upsert({
+    const { error: profileError } = await supabase.from("profil_pengguna").upsert({
       id: user.id,
       username: targetUsername,
       role: targetRole,
       email: targetEmail,
+      is_active: true,
     });
 
     if (profileError) {
-      console.log("Catatan tabel profiles:", profileError.message);
+      console.log("Catatan tabel profil_pengguna:", profileError.message);
     } else {
-      console.log("Data profil superadmin berhasil disinkronkan ke tabel profiles.");
+      console.log("Data profil superadmin berhasil disinkronkan ke tabel profil_pengguna.");
     }
   } catch (err) {
-    console.log("Catatan tabel profiles belum aktif di database.");
+    console.log("Catatan tabel profil_pengguna belum aktif di database.");
   }
 
   console.log("\nProses selesai!");

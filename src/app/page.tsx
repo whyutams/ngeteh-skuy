@@ -1,4 +1,4 @@
-import { Coffee } from "lucide-react";
+import Image from "next/image";
 import { LoginForm } from "@/components/auth/login-form";
 
 export default function LoginPage() {
@@ -6,11 +6,15 @@ export default function LoginPage() {
     <main className="min-h-screen grid grid-cols-1 lg:grid-cols-12 bg-white text-slate-900">
       {/* Sisi Kiri: Branding & Nuansa Teh (Warna Solid, Bersih Tanpa AI Slop) */}
       <section className="hidden lg:flex lg:col-span-7 xl:col-span-8 flex-col justify-between p-12 xl:p-16 bg-tea-900 text-white">
-        {/* Brand & Logo */}
+        {/* Brand & Logo Resmi */}
         <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-xl bg-tea-800 text-amber-200 border border-tea-700/60 shadow-sm">
-            <Coffee className="h-6 w-6" />
-          </div>
+          <Image
+            src="/img/logo-ngeteh-skuyy-hd.png"
+            alt="Logo NGETEH SKUYY"
+            width={44}
+            height={44}
+            className="rounded-xl shadow-sm object-cover"
+          />
           <span className="text-xl font-bold tracking-tight text-white">
             NGETEH SKUYY
           </span>
@@ -35,9 +39,13 @@ export default function LoginPage() {
         <div className="w-full max-w-sm space-y-7">
           {/* Header Mobile Brand (Tampil di Layar Kecil) */}
           <div className="lg:hidden flex items-center gap-3 pb-3 border-b border-slate-200">
-            <div className="p-2 rounded-lg bg-tea-700 text-white">
-              <Coffee className="h-5 w-5" />
-            </div>
+            <Image
+              src="/img/logo-ngeteh-skuyy-hd.png"
+              alt="Logo NGETEH SKUYY"
+              width={36}
+              height={36}
+              className="rounded-lg shadow-sm object-cover"
+            />
             <span className="font-bold text-lg text-slate-900">
               NGETEH SKUYY
             </span>

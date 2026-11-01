@@ -67,7 +67,7 @@ export async function loginAction(
   try {
     const admin = createAdminClient();
     const { data: profile } = await admin
-      .from("profiles")
+      .from("profil_pengguna")
       .select("email")
       .eq("username", username.toLowerCase())
       .maybeSingle();
