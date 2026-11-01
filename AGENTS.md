@@ -24,10 +24,16 @@ Dokumen ini adalah aturan utama dan standar baku pengembangan untuk seluruh proy
 ## 2. Standar Teks UI & Anti-AI Slop
 - **Label Pendek & Natural**: Gunakan label yang singkat, padat, dan natural layaknya software production nyata.
   - Hindari instruksi bertele-tele atau hiperbolis (contoh: gunakan `Nama`, bukan `Nama Lengkap Pengguna *`; gunakan `Email`, bukan `Alamat Email Aktif *`; gunakan `URL`, bukan `Alamat Web / URL *`).
-- **Dilarang Badge Internal**: Dilarang mencantumkan badge teknis internal di antarmuka (seperti badge `CRUD`, `REST`, atau `API` pada menu navigasi).
+- **Dilarang Badge Internal & Badge Dekoratif**: Dilarang mencantumkan badge teknis internal (seperti `CRUD`, `REST`, `API`) maupun badge/chip dekoratif mengambang yang tidak fungsional (seperti badge pill dengan ikon kilauan `✨ Sistem Operasional & Layanan`).
+- **Dilarang Subtitle / Slogan Palsu di Bawah Brand**: Tampilkan nama brand dan logo secara bersih tanpa menambah-nambahkan subtitle slogan buatan AI di bawahnya (contoh: dilarang menambahkan subteks *"Ruang Santai & Seduhan Autentik"*).
+- **Dilarang Kartu Informasi Dummy Pengisi Ruang**: Dilarang membuat kartu hiasan atau boks fitur palsu (contoh: kartu *"STANDAR LAYANAN"*) hanya untuk mengisi ruang kosong.
+- **Dilarang Kutipan / Quotes Mutiara Palsu**: Dilarang menambahkan kata-kata mutiara, kutipan puitis, atau filosofi palsu di panel atau footer halaman.
+- **Dilarang Teks Bantuan Redundan di Bawah Tombol**: Dilarang menyisipkan paragraf disclaimer bertele-tele di bawah tombol form (contoh: *"Akun dibuat secara khusus oleh Superadmin..."*).
+- **Format Hak Cipta Standar**: Gunakan format hak cipta standar bahasa Inggris: `© [Tahun] [Nama Proyek]. All rights reserved.` (bukan terjemahan kaku *"Seluruh hak cipta dilindungi"*).
+- **Dilarang Warna Gradient**: Seluruh elemen antarmuka wajib menggunakan warna solid.
 - **Tombol Aksi Utama (Primary)**: WAJIB menyertakan ikon yang relevan secara konsisten di seluruh halaman (misal: ikon `Plus` untuk Tambah/Buat, ikon `Save` / `Check` untuk Simpan, ikon `LogIn` untuk Login, ikon `Trash` untuk Hapus).
+- **Pustaka Ikon Resmi**: Seluruh ikon wajib berasal dari pustaka resmi (`lucide-react` dan/atau `font-awesome`), dilarang menggunakan raw inline SVG.
 - **Larangan Karakter Panah Mentah**: Dilarang menambahkan simbol panah atau karakter mentah pada teks tombol/link navigasi (misal: dilarang memakai `← Kembali` atau `Lanjut →`, gunakan teks bersih seperti `Kembali` atau `Lanjut`).
-- **Hapus Kalimat Bantuan Redundan**: Hapus kalimat bantuan/petunjuk di bawah form input yang redundan dan terkesan AI slop.
 - **Format Placeholder Standar**: Seluruh input form wajib memiliki placeholder seragam dengan format: `"Masukkan [nama field]"` (contoh: `"Masukkan email"`, `"Masukkan password"`). Dilarang menggunakan placeholder nilai acak, dummy tidak bermakna, atau format berlebihan.
 - **Tata Letak Proporsional Form**:
   - Panel atas (header breadcrumbs, judul, deskripsi, tombol aksi kembali) menggunakan lebar penuh (`w-full`).
