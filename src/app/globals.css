@@ -18,10 +18,42 @@
   --color-tea-800: #92400e;
   --color-tea-900: #78350f;
   --color-tea-950: #451a03;
+  --color-brand-yellow: #f8d818;
+  --color-brand-leaf: #65a30d;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans);
+}
+
+/* Wajib Cursor Pointer pada Seluruh Elemen Interaktif */
+button,
+[role="button"],
+select,
+input[type="submit"],
+input[type="reset"],
+input[type="button"],
+input[type="checkbox"],
+input[type="radio"],
+summary,
+a {
+  cursor: pointer;
+}
+
+button:disabled,
+[role="button"][aria-disabled="true"],
+input:disabled,
+select:disabled {
+  cursor: not-allowed;
+}
+
+/* Hilangkan Scrollbar Bawaan Browser */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }

@@ -59,7 +59,7 @@ export function LoginForm() {
           htmlFor="username"
           className="block text-sm font-medium text-slate-700"
         >
-          Username
+          Username <span className="text-rose-500 ml-0.5">*</span>
         </label>
         <input
           id="username"
@@ -90,7 +90,7 @@ export function LoginForm() {
           htmlFor="password"
           className="block text-sm font-medium text-slate-700"
         >
-          Password
+          Password <span className="text-rose-500 ml-0.5">*</span>
         </label>
         <div className="relative">
           <input
@@ -114,7 +114,7 @@ export function LoginForm() {
             onClick={() => setShowPassword((prev) => !prev)}
             disabled={isPending}
             aria-label={showPassword ? "Sembunyikan password" : "Lihat password"}
-            className="absolute inset-y-0 right-0 flex items-center pr-3.5 text-slate-400 hover:text-slate-600 focus:outline-none disabled:opacity-50"
+            className="absolute inset-y-0 right-0 flex items-center pr-3.5 text-slate-400 hover:text-slate-600 focus:outline-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {showPassword ? (
               <EyeOff className="h-4 w-4" />
@@ -135,7 +135,7 @@ export function LoginForm() {
         <button
           type="submit"
           disabled={!isFormValid || isPending}
-          className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium text-white bg-tea-700 hover:bg-tea-800 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-tea-600 focus:ring-offset-2 transition-colors shadow-sm"
+          className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium text-white bg-tea-700 hover:bg-tea-800 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer focus:outline-none focus:ring-2 focus:ring-tea-600 focus:ring-offset-2 transition-colors shadow-sm"
         >
           {isPending ? (
             <>

@@ -1,22 +1,35 @@
 import Image from "next/image";
+import { redirect } from "next/navigation";
 import { LoginForm } from "@/components/auth/login-form";
+import { getCurrentSession } from "@/libs/auth-session";
+import { APP_NAME } from "@/libs/constants";
 
-export default function LoginPage() {
+export default async function LoginPage() {
+  const session = await getCurrentSession();
+
+  // Jika sudah terautentikasi / sudah login, alihkan otomatis ke dashboard
+  if (session.user) {
+    redirect("/dashboard");
+  }
+
   return (
     <main className="min-h-screen grid grid-cols-1 lg:grid-cols-12 bg-white text-slate-900">
       {/* Sisi Kiri: Branding & Nuansa Teh (Warna Solid, Bersih Tanpa AI Slop) */}
       <section className="hidden lg:flex lg:col-span-7 xl:col-span-8 flex-col justify-between p-12 xl:p-16 bg-tea-900 text-white">
-        {/* Brand & Logo Resmi */}
+        {/* Brand & Logo Resmi (Lingkaran Sempurna) */}
         <div className="flex items-center gap-3">
-          <Image
-            src="/img/logo-ngeteh-skuyy-hd.png"
-            alt="Logo NGETEH SKUYY"
-            width={44}
-            height={44}
-            className="rounded-xl shadow-sm object-cover"
-          />
-          <span className="text-xl font-bold tracking-tight text-white">
-            NGETEH SKUYY
+          <div className="relative h-12 w-12 rounded-full overflow-hidden ring-2 ring-amber-400 shadow-md bg-[#f9dc12] shrink-0">
+            <Image
+              src="/img/logo-web.png"
+              alt={`Logo ${APP_NAME}`}
+              fill
+              sizes="48px"
+              className="object-cover"
+              priority
+            />
+          </div>
+          <span className="text-xl font-bold tracking-tight text-white uppercase">
+            {APP_NAME}
           </span>
         </div>
 
@@ -26,7 +39,7 @@ export default function LoginPage() {
             Seduhan hangat, suasana tenang, layanan tertata rapi.
           </h1>
           <p className="text-sm text-amber-100/80 leading-relaxed">
-            Platform operasional NGETEH SKUYY. Kelola layanan, stok seduhan, dan data transaksi dengan sistem yang andal.
+            Platform operasional {APP_NAME}. Kelola layanan, stok seduhan, dan data transaksi dengan sistem yang andal.
           </p>
         </div>
 
@@ -39,15 +52,18 @@ export default function LoginPage() {
         <div className="w-full max-w-sm space-y-7">
           {/* Header Mobile Brand (Tampil di Layar Kecil) */}
           <div className="lg:hidden flex items-center gap-3 pb-3 border-b border-slate-200">
-            <Image
-              src="/img/logo-ngeteh-skuyy-hd.png"
-              alt="Logo NGETEH SKUYY"
-              width={36}
-              height={36}
-              className="rounded-lg shadow-sm object-cover"
-            />
-            <span className="font-bold text-lg text-slate-900">
-              NGETEH SKUYY
+            <div className="relative h-10 w-10 rounded-full overflow-hidden ring-2 ring-amber-400 shadow-sm bg-[#f9dc12] shrink-0">
+              <Image
+                src="/img/logo-web.png"
+                alt={`Logo ${APP_NAME}`}
+                fill
+                sizes="40px"
+                className="object-cover"
+                priority
+              />
+            </div>
+            <span className="font-bold text-lg text-slate-900 uppercase">
+              {APP_NAME}
             </span>
           </div>
 
@@ -67,7 +83,7 @@ export default function LoginPage() {
           {/* Footer Hak Cipta */}
           <div className="pt-4 border-t border-slate-100 text-center">
             <p className="text-xs text-slate-400">
-              &copy; 2026 NGETEH SKUYY. All rights reserved.
+              &copy; 2026 {APP_NAME}. All rights reserved.
             </p>
           </div>
         </div>

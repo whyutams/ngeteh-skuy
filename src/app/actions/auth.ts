@@ -59,24 +59,50 @@ export async function loginAction(
 
   const supabase = await createClient();
 
-  // Cari email akun berdasarkan username
-  let targetEmail = username.includes("@")
-    ? username
-    : `${username.toLowerCase()}@ngeteh-skuyy.internal`;
+  // Cari email akun berdasarkan username atau input email
+  const cleanUsername = username.trim().toLowerCase();
+  let targetEmail: string | null = cleanUsername.includes("@") ? cleanUsername : null;
 
-  try {
+  if (!targetEmail) {
     const admin = createAdminClient();
-    const { data: profile } = await admin
-      .from("profil_pengguna")
-      .select("email")
-      .eq("username", username.toLowerCase())
-      .maybeSingle();
 
-    if (profile?.email) {
-      targetEmail = profile.email;
+    // 1. Coba cari di tabel database profil_pengguna
+    try {
+      const { data: profile } = await admin
+        .from("profil_pengguna")
+        .select("email")
+        .eq("username", cleanUsername)
+        .maybeSingle();
+
+      if (profile?.email) {
+        targetEmail = profile.email;
+      }
+    } catch {
+      // Abaikan jika tabel belum siap
     }
-  } catch {
-    // Abaikan kegagalan query profil dan gunakan email bawaan
+
+    // 2. Jika tidak ditemukan (misal email baru diubah di profil atau tabel belum dibuat),
+    // cocokkan dengan username pada data auth Supabase
+    if (!targetEmail) {
+      try {
+        const { data: authData } = await admin.auth.admin.listUsers();
+        const matchedUser = authData?.users?.find(
+          (u) =>
+            u.user_metadata?.username?.toLowerCase() === cleanUsername ||
+            u.email?.split("@")[0].toLowerCase() === cleanUsername
+        );
+        if (matchedUser?.email) {
+          targetEmail = matchedUser.email;
+        }
+      } catch {
+        // Abaikan
+      }
+    }
+
+    // 3. Fallback email default format internal
+    if (!targetEmail) {
+      targetEmail = `${cleanUsername}@ngeteh-skuyy.internal`;
+    }
   }
 
   // Autentikasi sesi melalui Supabase
