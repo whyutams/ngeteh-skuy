@@ -1,8 +1,8 @@
 import { z } from "zod";
 
-// Skema validasi penyesuaian stok
+// skema validasi penyesuaian stok
 export const stokAdjustmentSchema = z.object({
-  produk_id: z.string().uuid({ message: "Produk tidak valid." }),
+  produk_id: z.string().trim().min(1, { message: "Produk wajib dipilih." }),
   tipe_mutasi: z.enum(["masuk", "keluar", "penyesuaian"], {
     error: () => ({ message: "Tipe mutasi tidak valid." }),
   }),

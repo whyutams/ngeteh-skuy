@@ -1,13 +1,18 @@
 import { z } from "zod";
 
-// Skema validasi produk menu
+// skema validasi produk menu
 export const menuSchema = z.object({
   nama_produk: z
     .string()
     .trim()
     .min(2, { message: "Nama produk minimal 2 karakter." })
     .max(80, { message: "Nama produk maksimal 80 karakter." }),
-  kategori_id: z.string().uuid({ message: "Kategori tidak valid." }).nullable().optional(),
+  kategori_id: z
+    .string()
+    .trim()
+    .nullable()
+    .optional()
+    .transform((val) => (!val || val === "" ? null : val)),
   gambar_url: z.string().trim().url({ message: "Format URL gambar tidak valid." }).or(z.literal("")).nullable().optional(),
   harga: z
     .coerce
