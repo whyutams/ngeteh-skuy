@@ -118,6 +118,9 @@ create table if not exists public.produk_menu (
   updated_at timestamptz default now()
 );
 
+-- Migrasi jika tabel produk_menu sudah dibuat sebelumnya
+alter table public.produk_menu add column if not exists harga_modal numeric not null default 0 check (harga_modal >= 0);
+
 alter table public.produk_menu enable row level security;
 
 -- Seluruh pengguna login (Superadmin & Karyawan) dapat membaca menu aktif

@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { getCurrentSession } from "@/libs/auth-session";
 import { createAdminClient } from "@/libs/supabase/admin";
+import { getFallbackHargaModalMap } from "@/libs/harga-modal";
 
 export interface TransaksiItemInput {
   produk_id: string;
@@ -343,7 +344,7 @@ export async function getLaporanPenjualanAction(
       };
     }
 
-    // Ambil seluruh master produk menu agar laporan memuat seluruh menu outlet
+    // ambil seluruh master produk menu agar laporan memuat seluruh menu outlet
     let { data: allProducts, error: prodErr } = await admin
       .from("produk_menu")
       .select(
@@ -352,14 +353,18 @@ export async function getLaporanPenjualanAction(
       .order("nama_produk", { ascending: true });
 
     // fallback jika kolom belum ada di database
-    if (prodErr && prodErr.message.includes("harga_modal")) {
+    if (prodErr && (prodErr.code === "PGRST204" || prodErr.message.includes("harga_modal"))) {
       const fallback = await admin
         .from("produk_menu")
         .select(
           "id, nama_produk, harga, stok, satuan, status_aktif, gambar_url, kategori_menu(nama_kategori)"
         )
         .order("nama_produk", { ascending: true });
-      allProducts = (fallback.data as any[])?.map((row) => ({ ...row, harga_modal: 0 })) || [];
+      const fallbackMap = await getFallbackHargaModalMap();
+      allProducts = (fallback.data as any[])?.map((row) => ({
+        ...row,
+        harga_modal: Number(fallbackMap[row.id]) || 0,
+      })) || [];
     }
 
     const list = (rows as unknown as TransaksiRecord[]) || [];

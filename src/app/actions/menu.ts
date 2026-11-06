@@ -4,6 +4,11 @@ import { revalidatePath } from "next/cache";
 import { getCurrentSession } from "@/libs/auth-session";
 import { createAdminClient } from "@/libs/supabase/admin";
 import { menuSchema, type MenuInput } from "@/libs/validations/menu";
+import {
+  getFallbackHargaModalMap,
+  saveFallbackHargaModal,
+  deleteFallbackHargaModal,
+} from "@/libs/harga-modal";
 
 export interface MenuItem {
   id: string;
@@ -34,7 +39,7 @@ export interface MenuActionResult {
   };
 }
 
-// Ambil seluruh daftar produk menu
+// ambil seluruh daftar produk menu
 export async function getMenuListAction(): Promise<{
   success: boolean;
   data: MenuItem[];
@@ -47,13 +52,18 @@ export async function getMenuListAction(): Promise<{
       .select("id, kategori_id, nama_produk, gambar_url, harga, harga_modal, stok, satuan, status_aktif, created_at, kategori_menu(nama_kategori)")
       .order("created_at", { ascending: false });
 
-    // Fallback jika kolom harga_modal belum dibuat di database Supabase
-    if (error && error.message.includes("harga_modal")) {
+    // fallback jika kolom harga_modal belum dibuat di database Supabase
+    if (error && (error.code === "PGRST204" || error.message.includes("harga_modal"))) {
       const fallback = await admin
         .from("produk_menu")
         .select("id, kategori_id, nama_produk, gambar_url, harga, stok, satuan, status_aktif, created_at, kategori_menu(nama_kategori)")
         .order("created_at", { ascending: false });
-      data = (fallback.data as any[])?.map((row) => ({ ...row, harga_modal: 0 })) || [];
+      
+      const fallbackMap = await getFallbackHargaModalMap();
+      data = (fallback.data as any[])?.map((row) => ({
+        ...row,
+        harga_modal: Number(fallbackMap[row.id]) || 0,
+      })) || [];
       error = fallback.error;
     }
 
@@ -71,7 +81,7 @@ export async function getMenuListAction(): Promise<{
   }
 }
 
-// Ambil detail satu produk menu berdasarkan ID
+// ambil detail satu produk menu berdasarkan ID
 export async function getMenuByIdAction(id: string): Promise<{
   success: boolean;
   data: MenuItem | null;
@@ -85,14 +95,18 @@ export async function getMenuByIdAction(id: string): Promise<{
       .eq("id", id)
       .maybeSingle();
 
-    // Fallback jika kolom harga_modal belum dibuat di database Supabase
-    if (error && error.message.includes("harga_modal")) {
+    // fallback jika kolom harga_modal belum dibuat di database Supabase
+    if (error && (error.code === "PGRST204" || error.message.includes("harga_modal"))) {
       const fallback = await admin
         .from("produk_menu")
         .select("id, kategori_id, nama_produk, gambar_url, harga, stok, satuan, status_aktif, created_at, kategori_menu(nama_kategori)")
         .eq("id", id)
         .maybeSingle();
-      data = fallback.data ? { ...fallback.data, harga_modal: 0 } as any : null;
+      
+      const fallbackMap = await getFallbackHargaModalMap();
+      data = fallback.data
+        ? ({ ...fallback.data, harga_modal: Number(fallbackMap[id]) || 0 } as any)
+        : null;
       error = fallback.error;
     }
 
@@ -110,7 +124,7 @@ export async function getMenuByIdAction(id: string): Promise<{
   }
 }
 
-// Tambah produk menu baru
+// tambah produk menu baru
 export async function createMenuAction(
   input: MenuInput
 ): Promise<MenuActionResult> {
@@ -146,8 +160,8 @@ export async function createMenuAction(
       .select("id")
       .single();
 
-    // Fallback jika kolom harga_modal belum ada di tabel database
-    if (error && error.message.includes("harga_modal")) {
+    // fallback jika kolom harga_modal belum ada di tabel database
+    if (error && (error.code === "PGRST204" || error.message.includes("harga_modal"))) {
       delete payload.harga_modal;
       const retry = await admin
         .from("produk_menu")
@@ -162,7 +176,10 @@ export async function createMenuAction(
       return { success: false, error: error?.message || "Gagal menyimpan menu." };
     }
 
-    // Catat mutasi awal jika ada stok
+    // simpan harga modal ke penyimpanan fallback
+    await saveFallbackHargaModal(newProd.id, validation.data.harga_modal ?? 0);
+
+    // catat mutasi awal jika ada stok
     if (validation.data.stok > 0) {
       await admin.from("riwayat_stok").insert({
         produk_id: newProd.id,
@@ -186,7 +203,7 @@ export async function createMenuAction(
   }
 }
 
-// Perbarui data menu
+// perbarui data menu
 export async function updateMenuAction(
   id: string,
   input: MenuInput
@@ -221,8 +238,8 @@ export async function updateMenuAction(
       .update(payload)
       .eq("id", id);
 
-    // Fallback jika kolom harga_modal belum ada di tabel database
-    if (error && error.message.includes("harga_modal")) {
+    // fallback jika kolom harga_modal belum ada di tabel database
+    if (error && (error.code === "PGRST204" || error.message.includes("harga_modal"))) {
       delete payload.harga_modal;
       const retry = await admin
         .from("produk_menu")
@@ -235,6 +252,9 @@ export async function updateMenuAction(
       return { success: false, error: error.message };
     }
 
+    // simpan harga modal ke penyimpanan fallback
+    await saveFallbackHargaModal(id, validation.data.harga_modal ?? 0);
+
     revalidatePath("/dashboard/menu");
     revalidatePath("/dashboard/kasir");
     revalidatePath("/dashboard/laporan");
@@ -245,7 +265,7 @@ export async function updateMenuAction(
   }
 }
 
-// Hapus produk menu
+// hapus produk menu
 export async function deleteMenuAction(id: string): Promise<MenuActionResult> {
   const session = await getCurrentSession();
   if (!session.isSuperadmin) {
@@ -260,6 +280,9 @@ export async function deleteMenuAction(id: string): Promise<MenuActionResult> {
       return { success: false, error: error.message };
     }
 
+    // hapus juga dari penyimpanan fallback
+    await deleteFallbackHargaModal(id);
+
     revalidatePath("/dashboard/menu");
     revalidatePath("/dashboard/stok");
     revalidatePath("/dashboard/kasir");
@@ -270,7 +293,7 @@ export async function deleteMenuAction(id: string): Promise<MenuActionResult> {
   }
 }
 
-// Unggah foto menu ke Supabase Storage (bucket menu-produk)
+// unggah foto menu ke Supabase Storage (bucket menu-produk)
 export async function uploadMenuImageAction(formData: FormData): Promise<{
   success: boolean;
   url?: string;

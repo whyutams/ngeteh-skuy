@@ -21,7 +21,7 @@ export function TambahMenuForm({ categories }: TambahMenuFormProps) {
   const router = useRouter();
   const [namaProduk, setNamaProduk] = useState("");
   const [kategoriId, setKategoriId] = useState("");
-  const [hargaModal, setHargaModal] = useState("");
+  const [hargaModal, setHargaModal] = useState("0");
   const [harga, setHarga] = useState("");
   const [stok, setStok] = useState("0");
   const [satuan, setSatuan] = useState("cup");
@@ -53,6 +53,8 @@ export function TambahMenuForm({ categories }: TambahMenuFormProps) {
   const isSubmittable =
     namaProduk.trim().length >= 2 &&
     Number(harga) > 0 &&
+    hargaModal.trim() !== "" &&
+    !isNaN(Number(hargaModal)) &&
     Number(hargaModal) >= 0 &&
     !isPending &&
     !isUploadingImage;

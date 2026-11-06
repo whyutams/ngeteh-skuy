@@ -23,7 +23,11 @@ export function EditMenuForm({ initialData, categories }: EditMenuFormProps) {
   const router = useRouter();
   const [namaProduk, setNamaProduk] = useState(initialData.nama_produk);
   const [kategoriId, setKategoriId] = useState(initialData.kategori_id || "");
-  const [hargaModal, setHargaModal] = useState(String(initialData.harga_modal ?? 0));
+  const [hargaModal, setHargaModal] = useState(
+    initialData.harga_modal !== undefined && initialData.harga_modal !== null
+      ? String(initialData.harga_modal)
+      : "0"
+  );
   const [harga, setHarga] = useState(String(initialData.harga));
   const [satuan, setSatuan] = useState(initialData.satuan);
   const [statusAktif, setStatusAktif] = useState(initialData.status_aktif);
@@ -54,6 +58,8 @@ export function EditMenuForm({ initialData, categories }: EditMenuFormProps) {
   const isSubmittable =
     namaProduk.trim().length >= 2 &&
     Number(harga) > 0 &&
+    hargaModal.trim() !== "" &&
+    !isNaN(Number(hargaModal)) &&
     Number(hargaModal) >= 0 &&
     !isPending &&
     !isUploadingImage;
