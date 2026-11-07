@@ -188,3 +188,18 @@ Dokumen ini adalah aturan utama dan standar baku pengembangan untuk seluruh proy
 - **Tampilan Fallback Ikon Minuman**: Jika gambar tidak ada atau gagal dimuat, antarmuka WAJIB menampilkan ikon representatif minuman teh (misal `CupSoda` dari `lucide-react`) dengan latar belakang kontras yang lembut dan rapi (`bg-tea-50 text-tea-700` atau sejenisnya).
 - **Dilarang Membiarkan Gambar Rusak (Broken Image)**: Dilarang membiarkan browser menampilkan ikon patah/rusak (*broken image placeholder*). Seluruh pemuatan gambar wajib memiliki penangkap error (`onError`) yang secara otomatis beralih menampilkan ikon minuman.
 
+---
+
+## 15. Standar Notifikasi & Pesan Pemberitahuan Aksi (CRUD)
+- **Wajib Pesan Sukses Seluruh Operasi Data (Create, Update, Delete)**: Seluruh aksi penambahan data baru (Create), pembaruan data (Update), maupun penghapusan data (Delete) yang berhasil WAJIB memunculkan pesan pemberitahuan sukses (*success alert / notification banner*).
+- **Tata Letak & Posisi Notifikasi**: Notifikasi pemberitahuan WAJIB diletakkan di bagian atas halaman fitur, tepat di bawah jejak navigasi breadcrumb (sebelum kartu header judul dan tabel/daftar konten).
+- **Styling Seragam**: Notifikasi menggunakan visual solid yang ramah dan kontras: `bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl p-4 text-sm font-medium`, menyertakan ikon sukses (`CheckCircle2` dari `lucide-react`), serta tombol tutup silang (`X` dengan `cursor-pointer`).
+- **Format Pesan Lugas & Konsisten**: Gunakan kalimat sederhana to the point:
+  - Tambah Data: `"[Entitas] berhasil ditambahkan."` (contoh: `"Menu berhasil ditambahkan."`, `"Bahan baku berhasil ditambahkan."`, `"Kategori menu berhasil ditambahkan."`).
+  - Ubah Data: `"[Entitas] berhasil diperbarui."` (contoh: `"Menu berhasil diperbarui."`, `"Bahan baku berhasil diperbarui."`, `"Kategori menu berhasil diperbarui."`).
+  - Hapus Data: `"[Entitas] berhasil dihapus."` (contoh: `"Menu berhasil dihapus."`, `"Bahan baku berhasil dihapus."`, `"Kategori menu berhasil dihapus."`).
+- **Mekanisme Penanganan Navigasi Formulir**:
+  - Pada formulir Tambah atau Ubah data di halaman tersendiri, setelah submit berhasil dan dialihkan (`router.push`) ke halaman daftar utama, sertakan parameter status (contoh: `/dashboard/menu?status=created` atau `/dashboard/menu?status=updated`).
+  - Halaman daftar utama menangkap parameter tersebut untuk menampilkan alert banner di bawah breadcrumb, lalu membersihkan parameter URL agar tidak memicu pesan berulang saat halaman di-refresh.
+  - Pada aksi hapus data (yang dikonfirmasi melalui `ConfirmModal` di halaman daftar), setelah proses hapus berhasil, banner notifikasi sukses langsung ditampilkan seketika di bawah breadcrumb.
+

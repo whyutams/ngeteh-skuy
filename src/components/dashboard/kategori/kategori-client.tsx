@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Plus, Pencil, Trash, FolderTree } from "lucide-react";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
 import { Pagination } from "@/components/ui/pagination";
 import { Tooltip } from "@/components/ui/tooltip";
+import { AlertBanner } from "@/components/ui/alert-banner";
 import { Breadcrumbs } from "@/components/dashboard/breadcrumb";
 import { APP_NAME } from "@/libs/constants";
 import {
@@ -15,10 +16,24 @@ import {
 
 interface KategoriClientProps {
   initialData: KategoriItem[];
+  statusParam?: string;
 }
 
-export function KategoriClient({ initialData }: KategoriClientProps) {
+export function KategoriClient({ initialData, statusParam }: KategoriClientProps) {
   const [items, setItems] = useState<KategoriItem[]>(initialData);
+
+  // pesan notifikasi sukses
+  const [notificationMessage, setNotificationMessage] = useState<string | null>(() => {
+    if (statusParam === "created") return "Kategori menu berhasil ditambahkan.";
+    if (statusParam === "updated") return "Kategori menu berhasil diperbarui.";
+    return null;
+  });
+
+  useEffect(() => {
+    if (statusParam) {
+      window.history.replaceState({}, "", "/dashboard/kategori");
+    }
+  }, [statusParam]);
 
   // Modal konfirmasi hapus
   const [deleteTarget, setDeleteTarget] = useState<KategoriItem | null>(null);
@@ -39,6 +54,7 @@ export function KategoriClient({ initialData }: KategoriClientProps) {
     if (res.success) {
       setItems((prev) => prev.filter((k) => k.id !== deleteTarget.id));
       setDeleteTarget(null);
+      setNotificationMessage("Kategori menu berhasil dihapus.");
     }
   };
 
@@ -52,14 +68,22 @@ export function KategoriClient({ initialData }: KategoriClientProps) {
 
   return (
     <div className="space-y-6 w-full">
-      {/* Breadcrumb Navigasi */}
-      <Breadcrumbs items={[{ label: "Kategori" }]} />
+      {/* breadcrumb navigasi */}
+      <Breadcrumbs items={[{ label: "Kategori Menu" }]} />
 
-      {/* Panel Header Halaman */}
+      {/* notifikasi sukses aksi crud */}
+      {notificationMessage && (
+        <AlertBanner
+          message={notificationMessage}
+          onClose={() => setNotificationMessage(null)}
+        />
+      )}
+
+      {/* panel header halaman */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-5 bg-white rounded-xl border border-slate-200 shadow-xs">
         <div>
           <h2 className="text-xl font-bold text-slate-900 tracking-tight">
-            Kategori
+            Kategori Menu
           </h2>
           <p className="text-sm text-slate-500 mt-1">
             Kelola pengelompokan menu seduhan {APP_NAME}.

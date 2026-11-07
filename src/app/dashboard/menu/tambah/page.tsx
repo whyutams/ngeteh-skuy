@@ -1,8 +1,8 @@
 import { redirect } from "next/navigation";
 import { getCurrentSession } from "@/libs/auth-session";
 import { getKategoriListAction } from "@/app/actions/kategori";
+import { getBahanBakuListAction } from "@/app/actions/bahan-baku";
 import { TambahMenuForm } from "./tambah-menu-form";
-import { APP_NAME } from "@/libs/constants";
 
 export const metadata = {
   title: "Tambah Menu",
@@ -15,8 +15,16 @@ export default async function TambahMenuPage() {
     redirect("/dashboard/menu");
   }
 
-  const { data: categories } = await getKategoriListAction();
+  const [{ data: categories }, { data: bahanBakuList }] = await Promise.all([
+    getKategoriListAction(),
+    getBahanBakuListAction(),
+  ]);
 
-  return <TambahMenuForm categories={categories || []} />;
+  return (
+    <TambahMenuForm
+      categories={categories || []}
+      bahanBakuList={bahanBakuList || []}
+    />
+  );
 }
 

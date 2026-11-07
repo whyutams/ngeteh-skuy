@@ -56,7 +56,7 @@ export function TambahKaryawanForm() {
       });
 
       if (res.success) {
-        router.push("/dashboard/karyawan");
+        router.push("/dashboard/karyawan?status=created");
         router.refresh();
       } else {
         setFormState(res);

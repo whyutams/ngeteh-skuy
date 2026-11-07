@@ -5,12 +5,17 @@ import { MenuClient } from "@/components/dashboard/menu/menu-client";
 import { APP_NAME } from "@/libs/constants";
 
 export const metadata = {
-  title: "Data Menu",
+  title: "Kelola Menu",
 };
 
-export default async function MenuPage() {
+interface MenuPageProps {
+  searchParams?: Promise<{ status?: string }>;
+}
+
+export default async function MenuPage({ searchParams }: MenuPageProps) {
   const session = await getCurrentSession();
   const isOwner = session.isSuperadmin;
+  const { status } = (await searchParams) || {};
 
   const [{ data: menus }, { data: categories }] = await Promise.all([
     getMenuListAction(),
@@ -22,6 +27,7 @@ export default async function MenuPage() {
       initialMenus={menus || []}
       categories={categories || []}
       isOwner={isOwner}
+      statusParam={status}
     />
   );
 }

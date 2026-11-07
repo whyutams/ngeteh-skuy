@@ -2,8 +2,11 @@ import { redirect, notFound } from "next/navigation";
 import { getCurrentSession } from "@/libs/auth-session";
 import { getMenuByIdAction } from "@/app/actions/menu";
 import { getKategoriListAction } from "@/app/actions/kategori";
+import {
+  getBahanBakuListAction,
+  getResepByProdukIdAction,
+} from "@/app/actions/bahan-baku";
 import { EditMenuForm } from "./edit-menu-form";
-import { APP_NAME } from "@/libs/constants";
 
 export const metadata = {
   title: "Ubah Menu",
@@ -21,15 +24,25 @@ export default async function EditMenuPage({ params }: EditMenuPageProps) {
   }
 
   const { id } = await params;
-  const [{ data: menu }, { data: categories }] = await Promise.all([
-    getMenuByIdAction(id),
-    getKategoriListAction(),
-  ]);
+  const [{ data: menu }, { data: categories }, { data: bahanBakuList }, { data: existingResep }] =
+    await Promise.all([
+      getMenuByIdAction(id),
+      getKategoriListAction(),
+      getBahanBakuListAction(),
+      getResepByProdukIdAction(id),
+    ]);
 
   if (!menu) {
     notFound();
   }
 
-  return <EditMenuForm initialData={menu} categories={categories || []} />;
+  return (
+    <EditMenuForm
+      initialData={menu}
+      categories={categories || []}
+      bahanBakuList={bahanBakuList || []}
+      initialResep={existingResep || []}
+    />
+  );
 }
 

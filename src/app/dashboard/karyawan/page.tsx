@@ -8,7 +8,11 @@ export const metadata = {
   title: "Kelola Karyawan",
 };
 
-export default async function KaryawanPage() {
+interface KaryawanPageProps {
+  searchParams?: Promise<{ status?: string }>;
+}
+
+export default async function KaryawanPage({ searchParams }: KaryawanPageProps) {
   const session = await getCurrentSession();
 
   // Proteksi: Hanya Owner (superadmin) yang boleh melihat fitur ini
@@ -16,8 +20,9 @@ export default async function KaryawanPage() {
     redirect("/dashboard");
   }
 
+  const { status } = (await searchParams) || {};
   const { data } = await getKaryawanListAction();
 
-  return <KaryawanClient initialData={data || []} />;
+  return <KaryawanClient initialData={data || []} statusParam={status} />;
 }
 

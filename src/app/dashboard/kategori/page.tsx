@@ -8,7 +8,11 @@ export const metadata = {
   title: "Kategori Menu",
 };
 
-export default async function KategoriPage() {
+interface KategoriPageProps {
+  searchParams?: Promise<{ status?: string }>;
+}
+
+export default async function KategoriPage({ searchParams }: KategoriPageProps) {
   const session = await getCurrentSession();
 
   // Proteksi: Hanya Owner (superadmin) yang boleh melihat fitur ini
@@ -16,8 +20,9 @@ export default async function KategoriPage() {
     redirect("/dashboard");
   }
 
+  const { status } = (await searchParams) || {};
   const { data } = await getKategoriListAction();
 
-  return <KategoriClient initialData={data || []} />;
+  return <KategoriClient initialData={data || []} statusParam={status} />;
 }
 

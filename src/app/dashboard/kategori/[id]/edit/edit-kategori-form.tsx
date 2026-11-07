@@ -32,7 +32,7 @@ export function EditKategoriForm({ initialData }: EditKategoriFormProps) {
       });
 
       if (res.success) {
-        router.push("/dashboard/kategori");
+        router.push("/dashboard/kategori?status=updated");
         router.refresh();
       } else {
         setFormState(res);
@@ -42,10 +42,10 @@ export function EditKategoriForm({ initialData }: EditKategoriFormProps) {
 
   return (
     <div className="space-y-6 w-full">
-      {/* Breadcrumb Navigasi */}
+      {/* breadcrumb navigasi */}
       <Breadcrumbs
         items={[
-          { label: "Kategori", href: "/dashboard/kategori" },
+          { label: "Kategori Menu", href: "/dashboard/kategori" },
           { label: "Ubah Kategori" },
         ]}
       />

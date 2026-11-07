@@ -4,20 +4,31 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowLeft, Plus, Loader2, AlertCircle, Upload } from "lucide-react";
+import { ArrowLeft, Plus, Loader2, AlertCircle, Upload, Trash } from "lucide-react";
 import { Breadcrumbs } from "@/components/dashboard/breadcrumb";
+import { Tooltip } from "@/components/ui/tooltip";
 import {
   createMenuAction,
   uploadMenuImageAction,
   type MenuActionResult,
 } from "@/app/actions/menu";
 import type { KategoriItem } from "@/app/actions/kategori";
+import type { BahanBakuRecord } from "@/libs/bahan-baku-store";
+
+interface ResepRow {
+  bahan_id: string;
+  jumlah_pemakaian: string;
+}
 
 interface TambahMenuFormProps {
   categories: KategoriItem[];
+  bahanBakuList?: BahanBakuRecord[];
 }
 
-export function TambahMenuForm({ categories }: TambahMenuFormProps) {
+export function TambahMenuForm({
+  categories,
+  bahanBakuList = [],
+}: TambahMenuFormProps) {
   const router = useRouter();
   const [namaProduk, setNamaProduk] = useState("");
   const [kategoriId, setKategoriId] = useState("");
@@ -28,9 +39,39 @@ export function TambahMenuForm({ categories }: TambahMenuFormProps) {
   const [statusAktif, setStatusAktif] = useState(true);
   const [gambarUrl, setGambarUrl] = useState("");
   const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [resepRows, setResepRows] = useState<ResepRow[]>([]);
 
   const [formState, setFormState] = useState<MenuActionResult | null>(null);
   const [isPending, startTransition] = useTransition();
+
+  const addResepRow = () => {
+    const available = bahanBakuList.find(
+      (b) => !resepRows.some((r) => r.bahan_id === b.id)
+    );
+    setResepRows((prev) => [
+      ...prev,
+      {
+        bahan_id: available?.id || bahanBakuList[0]?.id || "",
+        jumlah_pemakaian: "1",
+      },
+    ]);
+  };
+
+  const updateResepRow = (
+    index: number,
+    field: "bahan_id" | "jumlah_pemakaian",
+    value: string
+  ) => {
+    setResepRows((prev) => {
+      const next = [...prev];
+      next[index] = { ...next[index], [field]: value };
+      return next;
+    });
+  };
+
+  const removeResepRow = (index: number) => {
+    setResepRows((prev) => prev.filter((_, i) => i !== index));
+  };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -63,6 +104,13 @@ export function TambahMenuForm({ categories }: TambahMenuFormProps) {
     e.preventDefault();
     if (!isSubmittable) return;
 
+    const validResep = resepRows
+      .filter((r) => r.bahan_id && Number(r.jumlah_pemakaian) > 0)
+      .map((r) => ({
+        bahan_id: r.bahan_id,
+        jumlah_pemakaian: Number(r.jumlah_pemakaian),
+      }));
+
     setFormState(null);
     startTransition(async () => {
       const res = await createMenuAction({
@@ -74,10 +122,11 @@ export function TambahMenuForm({ categories }: TambahMenuFormProps) {
         satuan: satuan.trim() || "cup",
         stok: Number(stok) || 0,
         status_aktif: statusAktif,
+        resep: validResep,
       });
 
       if (res.success) {
-        router.push("/dashboard/menu");
+        router.push("/dashboard/menu?status=created");
         router.refresh();
       } else {
         setFormState(res);
@@ -87,10 +136,10 @@ export function TambahMenuForm({ categories }: TambahMenuFormProps) {
 
   return (
     <div className="space-y-6 w-full">
-      {/* Breadcrumb Navigasi */}
+      {/* breadcrumb navigasi */}
       <Breadcrumbs
         items={[
-          { label: "Data Menu", href: "/dashboard/menu" },
+          { label: "Kelola Menu", href: "/dashboard/menu" },
           { label: "Tambah Menu" },
         ]}
       />
@@ -329,6 +378,98 @@ export function TambahMenuForm({ categories }: TambahMenuFormProps) {
                 </p>
               )}
             </div>
+          </div>
+
+          {/* Komposisi Bahan Baku (Resep Menu) */}
+          <div className="space-y-3 pt-4 border-t border-slate-200">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+              <div>
+                <h3 className="text-sm font-semibold text-slate-900">
+                  Komposisi Bahan Baku (Resep Menu)
+                </h3>
+                <p className="text-xs text-slate-500">
+                  Tentukan bahan baku yang otomatis terpotong saat menu ini dipesan di kasir POS.
+                </p>
+              </div>
+              {bahanBakuList.length > 0 && (
+                <button
+                  type="button"
+                  onClick={addResepRow}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-amber-900 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded-lg transition-colors cursor-pointer w-fit"
+                >
+                  <Plus className="h-3.5 w-3.5" />
+                  <span>Tambah Bahan</span>
+                </button>
+              )}
+            </div>
+
+            {resepRows.length === 0 ? (
+              <div className="p-4 bg-slate-50/60 border border-dashed border-slate-200 rounded-lg text-center text-xs text-slate-400">
+                Belum ada bahan baku yang dihubungkan ke menu ini. Klik tombol Tambah Bahan di atas untuk menentukan resep pemakaian.
+              </div>
+            ) : (
+              <div className="space-y-2.5">
+                {resepRows.map((row, idx) => {
+                  const selectedBahan = bahanBakuList.find((b) => b.id === row.bahan_id);
+                  return (
+                    <div
+                      key={idx}
+                      className="flex flex-col sm:flex-row sm:items-center gap-3 p-3 bg-slate-50/70 border border-slate-200 rounded-lg"
+                    >
+                      <div className="flex-1">
+                        <label className="block text-[11px] font-medium text-slate-500 mb-1">
+                          Pilih Bahan Baku <span className="text-rose-500 ml-0.5">*</span>
+                        </label>
+                        <select
+                          value={row.bahan_id}
+                          onChange={(e) => updateResepRow(idx, "bahan_id", e.target.value)}
+                          className="w-full bg-white border border-slate-200 rounded-lg py-2 px-3 text-xs focus:outline-none focus:ring-2 focus:ring-amber-500 cursor-pointer"
+                        >
+                          <option value="">Pilih Bahan Baku</option>
+                          {bahanBakuList.map((b) => (
+                            <option key={b.id} value={b.id}>
+                              {b.nama_bahan} (stok: {Number(b.stok).toLocaleString("id-ID")} {b.satuan})
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div className="w-full sm:w-52">
+                        <label className="block text-[11px] font-medium text-slate-500 mb-1">
+                          Pemakaian per Porsi <span className="text-rose-500 ml-0.5">*</span>
+                        </label>
+                        <div className="relative">
+                          <input
+                            type="number"
+                            step="any"
+                            min="0.01"
+                            value={row.jumlah_pemakaian}
+                            onChange={(e) => updateResepRow(idx, "jumlah_pemakaian", e.target.value)}
+                            placeholder="0"
+                            className="w-full bg-white border border-slate-200 rounded-lg py-2 pl-3 pr-14 text-xs focus:outline-none focus:ring-2 focus:ring-amber-500"
+                          />
+                          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-medium text-slate-400 pointer-events-none">
+                            {selectedBahan?.satuan || "satuan"}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="sm:pt-5 flex justify-end">
+                        <Tooltip content="Hapus baris bahan">
+                          <button
+                            type="button"
+                            onClick={() => removeResepRow(idx)}
+                            className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
+                          >
+                            <Trash className="h-4 w-4" />
+                          </button>
+                        </Tooltip>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
           {/* Status Ketersediaan */}

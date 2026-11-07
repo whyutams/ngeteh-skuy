@@ -62,7 +62,7 @@ export function PenyesuaianStokForm({
       });
 
       if (res.success) {
-        router.push("/dashboard/stok");
+        router.push("/dashboard/stok?status=adjusted");
         router.refresh();
       } else {
         setFormState(res);

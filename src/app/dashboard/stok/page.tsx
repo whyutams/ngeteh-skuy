@@ -8,9 +8,14 @@ export const metadata = {
   title: "Kelola Stok",
 };
 
-export default async function StokPage() {
+interface StokPageProps {
+  searchParams?: Promise<{ status?: string }>;
+}
+
+export default async function StokPage({ searchParams }: StokPageProps) {
   const session = await getCurrentSession();
   const isOwner = session.isSuperadmin;
+  const { status } = (await searchParams) || {};
 
   const [{ data: products }, { data: logs }] = await Promise.all([
     getMenuListAction(),
@@ -22,6 +27,7 @@ export default async function StokPage() {
       products={products || []}
       initialLogs={logs || []}
       isOwner={isOwner}
+      statusParam={status}
     />
   );
 }

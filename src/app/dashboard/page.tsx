@@ -3,6 +3,7 @@ import Image from "next/image";
 import { MenuImage } from "@/components/ui/menu-image";
 import {
   Calculator,
+  Package,
   FolderTree,
   CupSoda,
   Boxes,
@@ -123,7 +124,7 @@ export default async function DashboardPage() {
         <div className="p-5 bg-white rounded-xl border border-slate-200 shadow-xs space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
-              Kategori
+              Kategori Menu
             </span>
             <div className="p-2 rounded-lg bg-amber-50 text-amber-700">
               <FolderTree className="h-5 w-5" />
@@ -186,7 +187,27 @@ export default async function DashboardPage() {
           <h3 className="text-base font-bold text-slate-900 tracking-tight">
             Menu Akses Cepat Owner
           </h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+            <Link
+              href="/dashboard/bahan-baku"
+              className="group p-4 bg-white rounded-xl border border-slate-200 hover:border-tea-700 hover:shadow-xs transition-all space-y-2"
+            >
+              <div className="flex items-center justify-between">
+                <div className="p-2 rounded-lg bg-tea-50 text-tea-700">
+                  <Package className="h-5 w-5" />
+                </div>
+                <ArrowRight className="h-4 w-4 text-slate-400 group-hover:text-tea-700 transition-colors" />
+              </div>
+              <div>
+                <h4 className="text-sm font-semibold text-slate-900 group-hover:text-tea-700 transition-colors">
+                  Bahan Baku
+                </h4>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Kelola stok bahan dan takaran resep.
+                </p>
+              </div>
+            </Link>
+
             <Link
               href="/dashboard/kategori"
               className="group p-4 bg-white rounded-xl border border-slate-200 hover:border-tea-700 hover:shadow-xs transition-all space-y-2"
@@ -219,7 +240,7 @@ export default async function DashboardPage() {
               </div>
               <div>
                 <h4 className="text-sm font-semibold text-slate-900 group-hover:text-tea-700 transition-colors">
-                  Data Menu
+                  Kelola Menu
                 </h4>
                 <p className="text-xs text-slate-500 mt-0.5">
                   Atur harga jual dan ketersediaan menu.

@@ -31,6 +31,18 @@ export const menuSchema = z.object({
     .min(0, { message: "Stok tidak boleh bernilai negatif." })
     .default(0),
   status_aktif: z.boolean().default(true),
+  resep: z
+    .array(
+      z.object({
+        bahan_id: z.string().trim().min(1, { message: "Bahan baku wajib dipilih." }),
+        jumlah_pemakaian: z
+          .coerce
+          .number()
+          .positive({ message: "Jumlah pemakaian harus lebih dari 0." }),
+      })
+    )
+    .optional()
+    .default([]),
 });
 
 export type MenuInput = z.infer<typeof menuSchema>;

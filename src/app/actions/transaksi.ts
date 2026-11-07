@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { getCurrentSession } from "@/libs/auth-session";
 import { createAdminClient } from "@/libs/supabase/admin";
 import { getFallbackHargaModalMap } from "@/libs/harga-modal";
+import { deductBahanBakuForSoldItems } from "@/app/actions/bahan-baku";
 
 export interface TransaksiItemInput {
   produk_id: string;
@@ -218,8 +219,12 @@ export async function createTransaksiAction(
       }
     }
 
+    // potong stok bahan baku berdasarkan komposisi resep menu
+    await deductBahanBakuForSoldItems(input.items);
+
     revalidatePath("/dashboard/kasir");
     revalidatePath("/dashboard/stok");
+    revalidatePath("/dashboard/bahan-baku");
     revalidatePath("/dashboard/penjualan");
     revalidatePath("/dashboard");
 

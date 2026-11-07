@@ -202,6 +202,9 @@ export async function createKaryawanAction(
   input: CreateKaryawanInput
 ): Promise<KaryawanActionResult> {
   const session = await getCurrentSession();
+  if (!session.user) {
+    return { success: false, error: "Sesi telah berakhir. Silakan login kembali." };
+  }
   if (!session.isSuperadmin) {
     return { success: false, error: "Akses ditolak. Fitur ini khusus Owner." };
   }
@@ -306,6 +309,9 @@ export async function resetPasswordKaryawanAction(
   input: ResetPasswordInput
 ): Promise<KaryawanActionResult> {
   const session = await getCurrentSession();
+  if (!session.user) {
+    return { success: false, error: "Sesi telah berakhir. Silakan login kembali." };
+  }
   if (!session.isSuperadmin) {
     return { success: false, error: "Akses ditolak. Fitur ini khusus Owner." };
   }
@@ -343,6 +349,9 @@ export async function toggleStatusKaryawanAction(
   currentStatus: boolean
 ): Promise<KaryawanActionResult> {
   const session = await getCurrentSession();
+  if (!session.user) {
+    return { success: false, error: "Sesi telah berakhir. Silakan login kembali." };
+  }
   if (!session.isSuperadmin) {
     return { success: false, error: "Akses ditolak. Fitur ini khusus Owner." };
   }

@@ -28,7 +28,7 @@ export function TambahKategoriForm() {
       });
 
       if (res.success) {
-        router.push("/dashboard/kategori");
+        router.push("/dashboard/kategori?status=created");
         router.refresh();
       } else {
         setFormState(res);
@@ -38,10 +38,10 @@ export function TambahKategoriForm() {
 
   return (
     <div className="space-y-6 w-full">
-      {/* Breadcrumb Navigasi */}
+      {/* breadcrumb navigasi */}
       <Breadcrumbs
         items={[
-          { label: "Kategori", href: "/dashboard/kategori" },
+          { label: "Kategori Menu", href: "/dashboard/kategori" },
           { label: "Tambah Kategori" },
         ]}
       />

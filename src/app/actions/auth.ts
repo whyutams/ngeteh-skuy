@@ -59,14 +59,30 @@ export async function loginAction(
 
   const supabase = await createClient();
 
-  // Cari email akun berdasarkan username atau input email
+  // cari email akun berdasarkan username atau input email
   const cleanUsername = username.trim().toLowerCase();
   let targetEmail: string | null = cleanUsername.includes("@") ? cleanUsername : null;
 
-  if (!targetEmail) {
-    const admin = createAdminClient();
+  const admin = createAdminClient();
 
-    // cari di tabel profil pengguna
+  // prioritaskan pencarian email akun langsung di Supabase Auth
+  try {
+    const { data: authData } = await admin.auth.admin.listUsers();
+    const matchedUser = authData?.users?.find(
+      (u) =>
+        u.user_metadata?.username?.toLowerCase() === cleanUsername ||
+        u.email?.toLowerCase() === cleanUsername ||
+        u.email?.split("@")[0].toLowerCase() === cleanUsername
+    );
+    if (matchedUser?.email) {
+      targetEmail = matchedUser.email;
+    }
+  } catch {
+    // abaikan jika gagal
+  }
+
+  if (!targetEmail) {
+    // cari di tabel profil pengguna jika belum ditemukan
     try {
       const { data: profile } = await admin
         .from("profil_pengguna")
@@ -81,34 +97,32 @@ export async function loginAction(
       // abaikan jika tabel belum siap
     }
 
-    // fallback jika belum sinkron di database
-    if (!targetEmail) {
-      try {
-        const { data: authData } = await admin.auth.admin.listUsers();
-        const matchedUser = authData?.users?.find(
-          (u) =>
-            u.user_metadata?.username?.toLowerCase() === cleanUsername ||
-            u.email?.split("@")[0].toLowerCase() === cleanUsername
-        );
-        if (matchedUser?.email) {
-          targetEmail = matchedUser.email;
-        }
-      } catch {
-        // Abaikan
-      }
-    }
-
-    // 3. Fallback email default format internal
+    // fallback email default format internal
     if (!targetEmail) {
       targetEmail = `${cleanUsername}@ngeteh-skuyy.internal`;
     }
   }
 
-  // Autentikasi sesi melalui Supabase
-  const { error: authError } = await supabase.auth.signInWithPassword({
+  // autentikasi sesi melalui Supabase
+  let { error: authError } = await supabase.auth.signInWithPassword({
     email: targetEmail,
     password,
   });
+
+  // fallback mencoba email alternatif jika akun estehadmin
+  if (authError && (cleanUsername === "estehadmin" || targetEmail.includes("estehadmin"))) {
+    const altEmail =
+      targetEmail === "estehadmin@gmail.com"
+        ? "estehadmin@ngeteh-skuyy.internal"
+        : "estehadmin@gmail.com";
+    const retryAuth = await supabase.auth.signInWithPassword({
+      email: altEmail,
+      password,
+    });
+    if (!retryAuth.error) {
+      authError = null;
+    }
+  }
 
   if (authError) {
     return {

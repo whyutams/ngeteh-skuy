@@ -114,6 +114,9 @@ export async function createKategoriAction(
   input: KategoriInput
 ): Promise<KategoriActionResult> {
   const session = await getCurrentSession();
+  if (!session.user) {
+    return { success: false, error: "Sesi telah berakhir. Silakan login kembali." };
+  }
   if (!session.isSuperadmin) {
     return { success: false, error: "Akses ditolak. Fitur ini khusus Owner." };
   }
@@ -152,6 +155,9 @@ export async function updateKategoriAction(
   input: KategoriInput
 ): Promise<KategoriActionResult> {
   const session = await getCurrentSession();
+  if (!session.user) {
+    return { success: false, error: "Sesi telah berakhir. Silakan login kembali." };
+  }
   if (!session.isSuperadmin) {
     return { success: false, error: "Akses ditolak. Fitur ini khusus Owner." };
   }
@@ -190,6 +196,9 @@ export async function updateKategoriAction(
 // Hapus kategori
 export async function deleteKategoriAction(id: string): Promise<KategoriActionResult> {
   const session = await getCurrentSession();
+  if (!session.user) {
+    return { success: false, error: "Sesi telah berakhir. Silakan login kembali." };
+  }
   if (!session.isSuperadmin) {
     return { success: false, error: "Akses ditolak. Fitur ini khusus Owner." };
   }

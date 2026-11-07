@@ -32,7 +32,7 @@ export function DashboardShell({
   };
 
   return (
-    <div className="flex h-screen bg-slate-50 overflow-hidden font-sans">
+    <div className="fixed inset-0 flex overflow-hidden font-sans bg-slate-50">
       {/* Sidebar Navigasi (Mendukung Ciut/Expanded) */}
       <Sidebar
         userRole={userRole}
@@ -45,7 +45,7 @@ export function DashboardShell({
       />
 
       {/* Area Konten Utama (Lebar Penuh) */}
-      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+      <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
         <DashboardHeader
           userName={userName}
           userRole={userRole}
@@ -54,7 +54,7 @@ export function DashboardShell({
           onLogoutClick={() => setShowLogoutModal(true)}
         />
 
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 w-full">
+        <main className="flex-1 overflow-y-auto overscroll-y-contain touch-pan-y p-4 sm:p-6 lg:p-8 w-full">
           {children}
         </main>
       </div>

@@ -16,6 +16,7 @@ import {
   KeyRound,
 } from "lucide-react";
 import { Breadcrumbs } from "@/components/dashboard/breadcrumb";
+import { AlertBanner } from "@/components/ui/alert-banner";
 import { updateProfileAction, type ProfileActionResult } from "@/app/actions/profil";
 import { APP_NAME } from "@/libs/constants";
 
@@ -89,6 +90,14 @@ export function ProfilClient({ initialProfile }: ProfilClientProps) {
       {/* Breadcrumb Navigasi */}
       <Breadcrumbs items={[{ label: "Profil Akun" }]} />
 
+      {/* notifikasi sukses aksi crud */}
+      {successMessage && (
+        <AlertBanner
+          message={successMessage}
+          onClose={() => setSuccessMessage(null)}
+        />
+      )}
+
       {/* Header Halaman */}
       <div className="p-5 bg-white rounded-xl border border-slate-200 shadow-xs">
         <h2 className="text-xl font-bold text-slate-900 tracking-tight">
@@ -144,13 +153,6 @@ export function ProfilClient({ initialProfile }: ProfilClientProps) {
           <div className="flex items-center gap-2.5 p-4 text-sm text-rose-700 bg-rose-50 border border-rose-200 rounded-xl">
             <AlertCircle className="h-5 w-5 shrink-0 text-rose-600" />
             <span>{formState.error}</span>
-          </div>
-        )}
-
-        {successMessage && (
-          <div className="flex items-center gap-2.5 p-4 text-sm text-emerald-800 bg-emerald-50 border border-emerald-200 rounded-xl">
-            <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-600" />
-            <span>{successMessage}</span>
           </div>
         )}
 

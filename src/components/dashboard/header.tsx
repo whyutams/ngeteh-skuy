@@ -21,7 +21,7 @@ export function DashboardHeader({
   onLogoutClick,
 }: HeaderProps) {
   return (
-    <header className="sticky top-0 z-30 flex items-center justify-between h-16 px-4 sm:px-6 bg-white border-b border-slate-200 shadow-xs select-none">
+    <header className="shrink-0 sticky top-0 z-30 flex items-center justify-between h-16 w-full px-4 sm:px-6 bg-white border-b border-slate-200 shadow-xs select-none">
       {/* Sisi Kiri: Tombol Hamburger Mobile & Jam Operasional WITA */}
       <div className="flex items-center gap-2 sm:gap-3">
         <button

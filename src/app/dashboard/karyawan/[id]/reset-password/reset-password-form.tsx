@@ -50,7 +50,7 @@ export function ResetPasswordForm({ employee }: ResetPasswordFormProps) {
       });
 
       if (res.success) {
-        router.push("/dashboard/karyawan");
+        router.push("/dashboard/karyawan?status=reset");
         router.refresh();
       } else {
         setFormState(res);

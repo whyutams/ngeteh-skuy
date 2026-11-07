@@ -258,3 +258,61 @@ set
   satuan = excluded.satuan,
   status_aktif = excluded.status_aktif,
   updated_at = now();
+
+-- ------------------------------------------------------------------------------
+-- 8. TABEL bahan_baku (Kelola Bahan Baku Minuman / Outlet)
+-- ------------------------------------------------------------------------------
+create table if not exists public.bahan_baku (
+  id uuid primary key default gen_random_uuid(),
+  nama_bahan text not null,
+  stok numeric not null default 0 check (stok >= 0),
+  satuan text not null default 'gram',
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
+);
+
+alter table public.bahan_baku enable row level security;
+
+-- Pengguna login (Superadmin & Karyawan) dapat membaca data bahan baku
+create policy "Pengguna login dapat melihat bahan_baku"
+  on public.bahan_baku for select
+  using (auth.role() = 'authenticated');
+
+-- Hanya Superadmin yang dapat mengelola bahan baku
+create policy "Superadmin dapat mengelola bahan_baku"
+  on public.bahan_baku for all
+  using (
+    exists (
+      select 1 from public.profil_pengguna
+      where id = auth.uid() and role = 'superadmin'
+    )
+  );
+
+-- ------------------------------------------------------------------------------
+-- 9. TABEL resep_menu (Komposisi Pemakaian Bahan Baku per Menu)
+-- ------------------------------------------------------------------------------
+create table if not exists public.resep_menu (
+  id uuid primary key default gen_random_uuid(),
+  produk_id uuid not null references public.produk_menu(id) on delete cascade,
+  bahan_id uuid not null references public.bahan_baku(id) on delete cascade,
+  jumlah_pemakaian numeric not null default 1 check (jumlah_pemakaian > 0),
+  created_at timestamptz default now(),
+  unique (produk_id, bahan_id)
+);
+
+alter table public.resep_menu enable row level security;
+
+-- Pengguna login dapat melihat komposisi resep menu
+create policy "Pengguna login dapat melihat resep_menu"
+  on public.resep_menu for select
+  using (auth.role() = 'authenticated');
+
+-- Hanya Superadmin yang dapat mengelola resep menu
+create policy "Superadmin dapat mengelola resep_menu"
+  on public.resep_menu for all
+  using (
+    exists (
+      select 1 from public.profil_pengguna
+      where id = auth.uid() and role = 'superadmin'
+    )
+  );

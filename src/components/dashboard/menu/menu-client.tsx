@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { MenuImage } from "@/components/ui/menu-image";
@@ -15,6 +15,7 @@ import {
 import { ConfirmModal } from "@/components/ui/confirm-modal";
 import { Pagination } from "@/components/ui/pagination";
 import { Tooltip } from "@/components/ui/tooltip";
+import { AlertBanner } from "@/components/ui/alert-banner";
 import { Breadcrumbs } from "@/components/dashboard/breadcrumb";
 import { APP_NAME } from "@/libs/constants";
 import {
@@ -27,10 +28,29 @@ interface MenuClientProps {
   initialMenus: MenuItem[];
   categories: KategoriItem[];
   isOwner: boolean;
+  statusParam?: string;
 }
 
-export function MenuClient({ initialMenus, categories, isOwner }: MenuClientProps) {
+export function MenuClient({
+  initialMenus,
+  categories,
+  isOwner,
+  statusParam,
+}: MenuClientProps) {
   const [menus, setMenus] = useState<MenuItem[]>(initialMenus);
+
+  // pesan notifikasi sukses
+  const [notificationMessage, setNotificationMessage] = useState<string | null>(() => {
+    if (statusParam === "created") return "Menu berhasil ditambahkan.";
+    if (statusParam === "updated") return "Menu berhasil diperbarui.";
+    return null;
+  });
+
+  useEffect(() => {
+    if (statusParam) {
+      window.history.replaceState({}, "", "/dashboard/menu");
+    }
+  }, [statusParam]);
 
   // Filter & Pencarian
   const [searchQuery, setSearchQuery] = useState("");
@@ -55,6 +75,7 @@ export function MenuClient({ initialMenus, categories, isOwner }: MenuClientProp
     if (res.success) {
       setMenus((prev) => prev.filter((m) => m.id !== deleteTarget.id));
       setDeleteTarget(null);
+      setNotificationMessage("Menu berhasil dihapus.");
     }
   };
 
@@ -78,17 +99,25 @@ export function MenuClient({ initialMenus, categories, isOwner }: MenuClientProp
 
   return (
     <div className="space-y-6 w-full">
-      {/* Breadcrumb Navigasi */}
-      <Breadcrumbs items={[{ label: "Data Menu Seduhan" }]} />
+      {/* breadcrumb navigasi */}
+      <Breadcrumbs items={[{ label: "Kelola Menu" }]} />
 
-      {/* Header Halaman */}
+      {/* notifikasi sukses aksi crud */}
+      {notificationMessage && (
+        <AlertBanner
+          message={notificationMessage}
+          onClose={() => setNotificationMessage(null)}
+        />
+      )}
+
+      {/* header halaman */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-5 bg-white rounded-xl border border-slate-200 shadow-xs">
         <div>
           <h2 className="text-xl font-bold text-slate-900 tracking-tight">
-            Data Menu Seduhan
+            Kelola Menu
           </h2>
           <p className="text-sm text-slate-500 mt-1">
-            Daftar seluruh racikan minuman {APP_NAME}.
+            Daftar seluruh menu minuman {APP_NAME}.
           </p>
         </div>
 

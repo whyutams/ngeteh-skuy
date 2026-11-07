@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   UserPlus,
@@ -12,6 +12,7 @@ import {
 import { ConfirmModal } from "@/components/ui/confirm-modal";
 import { Pagination } from "@/components/ui/pagination";
 import { Tooltip } from "@/components/ui/tooltip";
+import { AlertBanner } from "@/components/ui/alert-banner";
 import { Breadcrumbs } from "@/components/dashboard/breadcrumb";
 import { APP_NAME } from "@/libs/constants";
 import {
@@ -21,10 +22,24 @@ import {
 
 interface KaryawanClientProps {
   initialData: KaryawanItem[];
+  statusParam?: string;
 }
 
-export function KaryawanClient({ initialData }: KaryawanClientProps) {
+export function KaryawanClient({ initialData, statusParam }: KaryawanClientProps) {
   const [employees, setEmployees] = useState<KaryawanItem[]>(initialData);
+
+  // pesan notifikasi sukses
+  const [notificationMessage, setNotificationMessage] = useState<string | null>(() => {
+    if (statusParam === "created") return "Karyawan berhasil ditambahkan.";
+    if (statusParam === "reset") return "Password karyawan berhasil direset.";
+    return null;
+  });
+
+  useEffect(() => {
+    if (statusParam) {
+      window.history.replaceState({}, "", "/dashboard/karyawan");
+    }
+  }, [statusParam]);
 
   // Pencarian
   const [searchQuery, setSearchQuery] = useState("");
@@ -55,6 +70,11 @@ export function KaryawanClient({ initialData }: KaryawanClientProps) {
         )
       );
       setStatusTarget(null);
+      setNotificationMessage(
+        nextStatus
+          ? "Akun karyawan berhasil diaktifkan."
+          : "Akun karyawan berhasil dinonaktifkan."
+      );
     }
   };
 
@@ -84,6 +104,14 @@ export function KaryawanClient({ initialData }: KaryawanClientProps) {
           { label: "Kelola Karyawan" },
         ]}
       />
+
+      {/* notifikasi sukses aksi crud */}
+      {notificationMessage && (
+        <AlertBanner
+          message={notificationMessage}
+          onClose={() => setNotificationMessage(null)}
+        />
+      )}
 
       {/* Header Halaman */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-5 bg-white rounded-xl border border-slate-200 shadow-xs">

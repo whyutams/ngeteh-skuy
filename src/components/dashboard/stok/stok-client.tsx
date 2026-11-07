@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { MenuImage } from "@/components/ui/menu-image";
@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { Pagination } from "@/components/ui/pagination";
 import { Tooltip } from "@/components/ui/tooltip";
+import { AlertBanner } from "@/components/ui/alert-banner";
 import { Breadcrumbs } from "@/components/dashboard/breadcrumb";
 import type { StokLogItem } from "@/app/actions/stok";
 import type { MenuItem } from "@/app/actions/menu";
@@ -24,9 +25,27 @@ interface StokClientProps {
   products: MenuItem[];
   initialLogs: StokLogItem[];
   isOwner: boolean;
+  statusParam?: string;
 }
 
-export function StokClient({ products, initialLogs, isOwner }: StokClientProps) {
+export function StokClient({
+  products,
+  initialLogs,
+  isOwner,
+  statusParam,
+}: StokClientProps) {
+  // pesan notifikasi sukses
+  const [notificationMessage, setNotificationMessage] = useState<string | null>(() => {
+    if (statusParam === "adjusted") return "Penyesuaian stok berhasil disimpan.";
+    return null;
+  });
+
+  useEffect(() => {
+    if (statusParam) {
+      window.history.replaceState({}, "", "/dashboard/stok");
+    }
+  }, [statusParam]);
+
   const [productList] = useState<MenuItem[]>(products);
   const [logList] = useState<StokLogItem[]>(initialLogs);
   const [activeTab, setActiveTab] = useState<"stok" | "riwayat">("stok");
@@ -71,6 +90,14 @@ export function StokClient({ products, initialLogs, isOwner }: StokClientProps) 
           { label: "Kelola Stok" },
         ]}
       />
+
+      {/* notifikasi sukses aksi crud */}
+      {notificationMessage && (
+        <AlertBanner
+          message={notificationMessage}
+          onClose={() => setNotificationMessage(null)}
+        />
+      )}
 
       {/* Header Halaman */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-5 bg-white rounded-xl border border-slate-200 shadow-xs">

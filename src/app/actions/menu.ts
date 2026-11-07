@@ -9,6 +9,7 @@ import {
   saveFallbackHargaModal,
   deleteFallbackHargaModal,
 } from "@/libs/harga-modal";
+import { saveResepMenuAction } from "@/app/actions/bahan-baku";
 
 export interface MenuItem {
   id: string;
@@ -129,6 +130,9 @@ export async function createMenuAction(
   input: MenuInput
 ): Promise<MenuActionResult> {
   const session = await getCurrentSession();
+  if (!session.user) {
+    return { success: false, error: "Sesi telah berakhir. Silakan login kembali." };
+  }
   if (!session.isSuperadmin) {
     return { success: false, error: "Akses ditolak. Fitur ini khusus Owner." };
   }
@@ -179,6 +183,11 @@ export async function createMenuAction(
     // simpan harga modal ke penyimpanan fallback
     await saveFallbackHargaModal(newProd.id, validation.data.harga_modal ?? 0);
 
+    // simpan komposisi resep bahan baku
+    if (validation.data.resep && validation.data.resep.length > 0) {
+      await saveResepMenuAction(newProd.id, validation.data.resep);
+    }
+
     // catat mutasi awal jika ada stok
     if (validation.data.stok > 0) {
       await admin.from("riwayat_stok").insert({
@@ -209,6 +218,9 @@ export async function updateMenuAction(
   input: MenuInput
 ): Promise<MenuActionResult> {
   const session = await getCurrentSession();
+  if (!session.user) {
+    return { success: false, error: "Sesi telah berakhir. Silakan login kembali." };
+  }
   if (!session.isSuperadmin) {
     return { success: false, error: "Akses ditolak. Fitur ini khusus Owner." };
   }
@@ -255,6 +267,11 @@ export async function updateMenuAction(
     // simpan harga modal ke penyimpanan fallback
     await saveFallbackHargaModal(id, validation.data.harga_modal ?? 0);
 
+    // perbarui komposisi resep bahan baku
+    if (validation.data.resep !== undefined) {
+      await saveResepMenuAction(id, validation.data.resep, true);
+    }
+
     revalidatePath("/dashboard/menu");
     revalidatePath("/dashboard/kasir");
     revalidatePath("/dashboard/laporan");
@@ -268,6 +285,9 @@ export async function updateMenuAction(
 // hapus produk menu
 export async function deleteMenuAction(id: string): Promise<MenuActionResult> {
   const session = await getCurrentSession();
+  if (!session.user) {
+    return { success: false, error: "Sesi telah berakhir. Silakan login kembali." };
+  }
   if (!session.isSuperadmin) {
     return { success: false, error: "Akses ditolak. Fitur ini khusus Owner." };
   }
@@ -300,6 +320,9 @@ export async function uploadMenuImageAction(formData: FormData): Promise<{
   error?: string;
 }> {
   const session = await getCurrentSession();
+  if (!session.user) {
+    return { success: false, error: "Sesi telah berakhir. Silakan login kembali." };
+  }
   if (!session.isSuperadmin) {
     return { success: false, error: "Akses ditolak. Fitur ini khusus Owner." };
   }

@@ -41,6 +41,9 @@ export async function adjustStockAction(
   input: StokAdjustmentInput
 ): Promise<StokActionResult> {
   const session = await getCurrentSession();
+  if (!session.user) {
+    return { success: false, error: "Sesi telah berakhir. Silakan login kembali." };
+  }
   if (!session.isSuperadmin) {
     return { success: false, error: "Akses ditolak. Fitur ini khusus Owner." };
   }

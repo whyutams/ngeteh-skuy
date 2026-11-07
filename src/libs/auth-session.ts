@@ -11,7 +11,7 @@ export interface UserProfile {
   is_active: boolean;
 }
 
-// Ambil data sesi autentikasi dan profil pengguna saat ini
+// ambil data sesi autentikasi dan profil pengguna saat ini
 export async function getCurrentSession(): Promise<{
   user: { id: string; email?: string } | null;
   profile: UserProfile | null;
@@ -19,21 +19,35 @@ export async function getCurrentSession(): Promise<{
 }> {
   try {
     const supabase = await createClient();
+    let user: { id: string; email?: string; user_metadata?: Record<string, any> } | null = null;
+
     const {
-      data: { user },
+      data: { user: authUser },
       error: userError,
     } = await supabase.auth.getUser();
 
-    if (userError || !user) {
+    if (!userError && authUser) {
+      user = authUser;
+    } else {
+      // fallback membaca sesi dari cookie jika getUser gagal
+      const { data: sessionData } = await supabase.auth.getSession();
+      if (sessionData?.session?.user) {
+        user = sessionData.session.user;
+      }
+    }
+
+    if (!user) {
       return { user: null, profile: null, isSuperadmin: false };
     }
 
-    // Periksa apakah user adalah akun estehadmin atau memiliki role superadmin di metadata
+    // periksa identitas owner bawaan atau metadata
     const userEmail = (user.email || "").toLowerCase();
-    const userMetaRole = user.user_metadata?.role as "superadmin" | "karyawan" | undefined;
-    const userMetaUsername = (user.user_metadata?.username || "").toLowerCase();
+    const userMetaRole = String(user.user_metadata?.role || "").toLowerCase();
+    const userMetaUsername = String(user.user_metadata?.username || "").toLowerCase();
     const isEstehAdminUser =
-      userEmail.startsWith("estehadmin") || userMetaUsername === "estehadmin";
+      userEmail.startsWith("estehadmin") ||
+      userMetaUsername === "estehadmin" ||
+      user.id === "48faebac-223a-4757-abc2-d4a9d55d47c8";
 
     let profile: UserProfile | null = null;
 
@@ -49,14 +63,13 @@ export async function getCurrentSession(): Promise<{
         profile = data as UserProfile;
       }
     } catch {
-      // Abaikan jika tabel belum siap
+      // abaikan jika tabel belum siap
     }
 
-    // Tentukan role: prioritaskan data tabel, lalu metadata, lalu akun bawaan estehadmin
-    const role: "superadmin" | "karyawan" =
-      profile?.role || userMetaRole || (isEstehAdminUser ? "superadmin" : "karyawan");
-
-    const isSuperadmin = role === "superadmin";
+    // tentukan role: prioritaskan data tabel, lalu metadata, lalu akun bawaan
+    const rawRole = String(profile?.role || userMetaRole || (isEstehAdminUser ? "superadmin" : "karyawan")).toLowerCase();
+    const isSuperadmin = rawRole === "superadmin" || isEstehAdminUser;
+    const role: "superadmin" | "karyawan" = isSuperadmin ? "superadmin" : "karyawan";
 
     const resolvedProfile: UserProfile = profile ?? {
       id: user.id,
