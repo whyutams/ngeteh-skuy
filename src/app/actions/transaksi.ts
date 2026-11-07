@@ -5,6 +5,7 @@ import { getCurrentSession } from "@/libs/auth-session";
 import { createAdminClient } from "@/libs/supabase/admin";
 import { getFallbackHargaModalMap } from "@/libs/harga-modal";
 import { deductBahanBakuForSoldItems } from "@/app/actions/bahan-baku";
+import { getTodayDateString } from "@/libs/date";
 
 export interface TransaksiItemInput {
   produk_id: string;
@@ -90,6 +91,15 @@ export interface LaporanSummary {
   };
   produkTerlaris: ProdukTerlarisItem[];
   transaksiList: TransaksiRecord[];
+}
+
+export interface TodaySalesSummary {
+  totalOmset: number;
+  totalModal: number;
+  totalKeuntungan: number;
+  marginPersen: number;
+  totalTransaksi: number;
+  totalItemTerjual: number;
 }
 
 // Buat transaksi baru dari modul Kasir POS
@@ -313,12 +323,12 @@ export async function getLaporanPenjualanAction(
       .eq("status_transaksi", "selesai");
 
     if (startDate) {
-      const startISO = new Date(`${startDate}T00:00:00.000Z`).toISOString();
+      const startISO = new Date(`${startDate}T00:00:00+08:00`).toISOString();
       query = query.gte("created_at", startISO);
     }
 
     if (endDate) {
-      const endISO = new Date(`${endDate}T23:59:59.999Z`).toISOString();
+      const endISO = new Date(`${endDate}T23:59:59.999+08:00`).toISOString();
       query = query.lte("created_at", endISO);
     }
 
@@ -523,6 +533,135 @@ export async function getLaporanPenjualanAction(
         },
         produkTerlaris: [],
         transaksiList: [],
+      },
+      error: message,
+    };
+  }
+}
+
+// ambil ringkasan statistik penjualan hari ini
+export async function getTodaySalesSummaryAction(): Promise<{
+  success: boolean;
+  data: TodaySalesSummary;
+  error?: string;
+}> {
+  const session = await getCurrentSession();
+  if (!session.user) {
+    return {
+      success: false,
+      data: {
+        totalOmset: 0,
+        totalModal: 0,
+        totalKeuntungan: 0,
+        marginPersen: 0,
+        totalTransaksi: 0,
+        totalItemTerjual: 0,
+      },
+      error: "Silakan login terlebih dahulu.",
+    };
+  }
+
+  try {
+    const admin = createAdminClient();
+    const todayStr = getTodayDateString();
+    const startISO = new Date(`${todayStr}T00:00:00+08:00`).toISOString();
+    const endISO = new Date(`${todayStr}T23:59:59.999+08:00`).toISOString();
+
+    const { data: rows, error } = await admin
+      .from("transaksi_penjualan")
+      .select(
+        "id, total_tagihan, status_transaksi, created_at, item_pembelian(id, produk_id, nama_produk, harga_satuan, jumlah, subtotal)"
+      )
+      .eq("status_transaksi", "selesai")
+      .gte("created_at", startISO)
+      .lte("created_at", endISO);
+
+    if (error) {
+      return {
+        success: false,
+        data: {
+          totalOmset: 0,
+          totalModal: 0,
+          totalKeuntungan: 0,
+          marginPersen: 0,
+          totalTransaksi: 0,
+          totalItemTerjual: 0,
+        },
+        error: error.message,
+      };
+    }
+
+    // ambil master produk menu untuk harga modal HPP
+    let { data: allProducts, error: prodErr } = await admin
+      .from("produk_menu")
+      .select("id, nama_produk, harga, harga_modal");
+
+    if (prodErr && (prodErr.code === "PGRST204" || prodErr.message.includes("harga_modal"))) {
+      const fallback = await admin.from("produk_menu").select("id, nama_produk, harga");
+      const fallbackMap = await getFallbackHargaModalMap();
+      allProducts =
+        (fallback.data as any[])?.map((row) => ({
+          ...row,
+          harga_modal: Number(fallbackMap[row.id]) || 0,
+        })) || [];
+    }
+
+    const modalMap = new Map<string, number>();
+    if (allProducts) {
+      for (const p of allProducts) {
+        modalMap.set(p.id, Number(p.harga_modal) || 0);
+        modalMap.set((p.nama_produk || "").toLowerCase(), Number(p.harga_modal) || 0);
+      }
+    }
+
+    const list = rows || [];
+    let totalOmset = 0;
+    let totalModal = 0;
+    let totalItemTerjual = 0;
+
+    for (const trx of list) {
+      totalOmset += Number(trx.total_tagihan) || 0;
+      if (trx.item_pembelian) {
+        for (const itm of trx.item_pembelian) {
+          const qty = Number(itm.jumlah) || 0;
+          totalItemTerjual += qty;
+          const keyId = itm.produk_id || "";
+          const keyName = (itm.nama_produk || "").toLowerCase();
+          const modalSatuan = modalMap.has(keyId)
+            ? (modalMap.get(keyId) ?? 0)
+            : (modalMap.get(keyName) ?? 0);
+          totalModal += qty * modalSatuan;
+        }
+      }
+    }
+
+    const totalKeuntungan = totalOmset - totalModal;
+    const marginPersen =
+      totalOmset > 0 ? Math.round((totalKeuntungan / totalOmset) * 100) : 0;
+
+    return {
+      success: true,
+      data: {
+        totalOmset,
+        totalModal,
+        totalKeuntungan,
+        marginPersen,
+        totalTransaksi: list.length,
+        totalItemTerjual,
+      },
+    };
+  } catch (err) {
+    const message =
+      err instanceof Error ? err.message : "Gagal memproses statistik hari ini.";
+    return {
+      success: false,
+      data: {
+        totalOmset: 0,
+        totalModal: 0,
+        totalKeuntungan: 0,
+        marginPersen: 0,
+        totalTransaksi: 0,
+        totalItemTerjual: 0,
       },
       error: message,
     };

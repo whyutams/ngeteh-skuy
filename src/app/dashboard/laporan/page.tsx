@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getCurrentSession } from "@/libs/auth-session";
 import { getLaporanPenjualanAction } from "@/app/actions/transaksi";
 import { LaporanClient } from "@/components/dashboard/laporan/laporan-client";
+import { getTodayDateString } from "@/libs/date";
 import { APP_NAME } from "@/libs/constants";
 
 export const metadata = {
@@ -16,13 +17,17 @@ export default async function LaporanPage() {
     redirect("/dashboard");
   }
 
-  const { data: laporanData } = await getLaporanPenjualanAction();
+  const todayStr = getTodayDateString();
+  const { data: laporanData } = await getLaporanPenjualanAction(todayStr, todayStr);
 
   return (
     <LaporanClient
       initialData={
         laporanData || {
           totalPendapatan: 0,
+          totalModal: 0,
+          totalKeuntungan: 0,
+          marginRataRata: 0,
           totalTransaksi: 0,
           rataRataTransaksi: 0,
           totalItemTerjual: 0,
@@ -35,6 +40,7 @@ export default async function LaporanPage() {
           transaksiList: [],
         }
       }
+      initialDate={todayStr}
     />
   );
 }

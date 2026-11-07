@@ -8,15 +8,17 @@ import {
   KeyRound,
   ShieldAlert,
   Search,
+  Trash2,
 } from "lucide-react";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
 import { Pagination } from "@/components/ui/pagination";
 import { Tooltip } from "@/components/ui/tooltip";
 import { AlertBanner } from "@/components/ui/alert-banner";
 import { Breadcrumbs } from "@/components/dashboard/breadcrumb";
-import { APP_NAME } from "@/libs/constants";
+import { APP_NAME, DEFAULT_OWNER_NAME } from "@/libs/constants";
 import {
   toggleStatusKaryawanAction,
+  deleteKaryawanAction,
   type KaryawanItem,
 } from "@/app/actions/karyawan";
 
@@ -48,9 +50,33 @@ export function KaryawanClient({ initialData, statusParam }: KaryawanClientProps
   const [statusTarget, setStatusTarget] = useState<KaryawanItem | null>(null);
   const [isTogglingStatus, setIsTogglingStatus] = useState(false);
 
+  // modal konfirmasi hapus karyawan
+  const [deleteTarget, setDeleteTarget] = useState<KaryawanItem | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
+
+  // hapus akun karyawan
+  const handleConfirmDelete = async () => {
+    if (!deleteTarget) return;
+
+    setIsDeleting(true);
+    const res = await deleteKaryawanAction(
+      deleteTarget.id,
+      deleteTarget.username
+    );
+    setIsDeleting(false);
+
+    if (res.success) {
+      setEmployees((prev) => prev.filter((item) => item.id !== deleteTarget.id));
+      setDeleteTarget(null);
+      setNotificationMessage("Karyawan berhasil dihapus.");
+    } else {
+      alert(res.error || "Gagal menghapus karyawan.");
+    }
+  };
 
   // Toggle Status Aktif/Nonaktif
   const handleConfirmToggleStatus = async () => {
@@ -158,13 +184,14 @@ export function KaryawanClient({ initialData, statusParam }: KaryawanClientProps
                 <th scope="col" className="py-3 px-4">Username</th>
                 <th scope="col" className="py-3 px-4">Status Akun</th>
                 <th scope="col" className="py-3 px-4">Tanggal Dibuat</th>
+                <th scope="col" className="py-3 px-4">Oleh</th>
                 <th scope="col" className="py-3 px-4 text-right w-36">Aksi</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {paginatedEmployees.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="py-12 text-center text-slate-400">
+                  <td colSpan={6} className="py-12 text-center text-slate-400">
                     <Users className="h-8 w-8 mx-auto mb-2 text-slate-300" />
                     Belum ada akun karyawan. Klik Tambah Karyawan untuk menambahkan.
                   </td>
@@ -199,6 +226,9 @@ export function KaryawanClient({ initialData, statusParam }: KaryawanClientProps
                         year: "numeric",
                       })}
                     </td>
+                    <td className="py-3.5 px-4 text-xs font-medium text-slate-700 whitespace-nowrap">
+                      {DEFAULT_OWNER_NAME}
+                    </td>
                     <td className="py-3.5 px-4 text-right">
                       <div className="flex items-center justify-end gap-1">
                         <Tooltip content="Reset Password">
@@ -221,6 +251,16 @@ export function KaryawanClient({ initialData, statusParam }: KaryawanClientProps
                             }`}
                           >
                             <ShieldAlert className="h-4 w-4" />
+                          </button>
+                        </Tooltip>
+
+                        <Tooltip content="Hapus Karyawan">
+                          <button
+                            type="button"
+                            onClick={() => setDeleteTarget(emp)}
+                            className="inline-flex items-center justify-center p-1.5 text-slate-600 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
+                          >
+                            <Trash2 className="h-4 w-4" />
                           </button>
                         </Tooltip>
                       </div>
@@ -258,6 +298,22 @@ export function KaryawanClient({ initialData, statusParam }: KaryawanClientProps
         variant={statusTarget?.is_active ? "danger" : "primary"}
         isLoading={isTogglingStatus}
         icon={<ShieldAlert className={`h-6 w-6 ${statusTarget?.is_active ? "text-rose-600" : "text-tea-700"}`} />}
+      />
+
+      {/* Modal Konfirmasi Hapus Karyawan dengan Ketik Username */}
+      <ConfirmModal
+        isOpen={Boolean(deleteTarget)}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={handleConfirmDelete}
+        title="Hapus Karyawan"
+        description={`Tindakan ini tidak dapat dibatalkan. Seluruh akses login dan data akun karyawan "${deleteTarget?.username}" akan dihapus permanen dari sistem.`}
+        confirmText="Hapus Karyawan"
+        cancelText="Batal"
+        variant="danger"
+        isLoading={isDeleting}
+        confirmMatchValue={deleteTarget?.username}
+        confirmInputPlaceholder={`Ketik "${deleteTarget?.username}"`}
+        icon={<Trash2 className="h-6 w-6 text-rose-600" />}
       />
     </div>
   );

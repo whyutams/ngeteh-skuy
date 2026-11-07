@@ -17,7 +17,7 @@ import { Pagination } from "@/components/ui/pagination";
 import { Tooltip } from "@/components/ui/tooltip";
 import { AlertBanner } from "@/components/ui/alert-banner";
 import { Breadcrumbs } from "@/components/dashboard/breadcrumb";
-import { APP_NAME } from "@/libs/constants";
+import { APP_NAME, DEFAULT_OWNER_NAME } from "@/libs/constants";
 import {
   deleteMenuAction,
   type MenuItem,
@@ -185,6 +185,7 @@ export function MenuClient({
                 )}
                 <th scope="col" className="py-3 px-4">Sisa Stok</th>
                 <th scope="col" className="py-3 px-4">Status</th>
+                <th scope="col" className="py-3 px-4">Oleh</th>
                 {isOwner && (
                   <th scope="col" className="py-3 px-4 text-right w-28">Aksi</th>
                 )}
@@ -193,7 +194,7 @@ export function MenuClient({
             <tbody className="divide-y divide-slate-100">
               {paginatedItems.length === 0 ? (
                 <tr>
-                  <td colSpan={isOwner ? 8 : 5} className="py-12 text-center text-slate-400">
+                  <td colSpan={isOwner ? 9 : 6} className="py-12 text-center text-slate-400">
                     <CupSoda className="h-8 w-8 mx-auto mb-2 text-slate-300" />
                     Belum ada menu yang sesuai.
                   </td>
@@ -255,6 +256,9 @@ export function MenuClient({
                       >
                         {item.status_aktif ? "Tersedia" : "Nonaktif"}
                       </span>
+                    </td>
+                    <td className="py-3.5 px-4 text-xs font-medium text-slate-700 whitespace-nowrap">
+                      {DEFAULT_OWNER_NAME}
                     </td>
                     {isOwner && (
                       <td className="py-3.5 px-4 text-right">

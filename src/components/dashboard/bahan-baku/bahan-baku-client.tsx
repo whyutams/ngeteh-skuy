@@ -9,6 +9,7 @@ import { Pagination } from "@/components/ui/pagination";
 import { ConfirmModal } from "@/components/ui/confirm-modal";
 import { Tooltip } from "@/components/ui/tooltip";
 import { AlertBanner } from "@/components/ui/alert-banner";
+import { DEFAULT_OWNER_NAME } from "@/libs/constants";
 import {
   deleteBahanBakuAction,
 } from "@/app/actions/bahan-baku";
@@ -161,6 +162,7 @@ export function BahanBakuClient({
                 <th className="py-3 px-4">Sisa Stok</th>
                 <th className="py-3 px-4">Satuan</th>
                 <th className="py-3 px-4">Terakhir Diperbarui</th>
+                <th className="py-3 px-4">Oleh</th>
                 {isOwner && <th className="py-3 px-4 text-right">Aksi</th>}
               </tr>
             </thead>
@@ -168,7 +170,7 @@ export function BahanBakuClient({
               {paginatedItems.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={isOwner ? 6 : 5}
+                    colSpan={isOwner ? 7 : 6}
                     className="py-12 text-center text-slate-400"
                   >
                     <div className="flex flex-col items-center justify-center gap-2">
@@ -216,6 +218,9 @@ export function BahanBakuClient({
                           month: "short",
                           year: "numeric",
                         })}
+                      </td>
+                      <td className="py-3 px-4 text-xs font-medium text-slate-700 whitespace-nowrap">
+                        {DEFAULT_OWNER_NAME}
                       </td>
                       {isOwner && (
                         <td className="py-3 px-4 text-right">

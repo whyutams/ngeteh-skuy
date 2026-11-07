@@ -8,7 +8,7 @@ import { Pagination } from "@/components/ui/pagination";
 import { Tooltip } from "@/components/ui/tooltip";
 import { AlertBanner } from "@/components/ui/alert-banner";
 import { Breadcrumbs } from "@/components/dashboard/breadcrumb";
-import { APP_NAME } from "@/libs/constants";
+import { APP_NAME, DEFAULT_OWNER_NAME } from "@/libs/constants";
 import {
   deleteKategoriAction,
   type KategoriItem,
@@ -110,13 +110,14 @@ export function KategoriClient({ initialData, statusParam }: KategoriClientProps
                 <th scope="col" className="py-3 px-4">Nama Kategori</th>
                 <th scope="col" className="py-3 px-4">Jumlah Menu</th>
                 <th scope="col" className="py-3 px-4">Dibuat</th>
+                <th scope="col" className="py-3 px-4">Oleh</th>
                 <th scope="col" className="py-3 px-4 text-right w-28">Aksi</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {paginatedItems.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="py-12 text-center text-slate-400">
+                  <td colSpan={6} className="py-12 text-center text-slate-400">
                     <FolderTree className="h-8 w-8 mx-auto mb-2 text-slate-300" />
                     Belum ada kategori menu. Klik tombol Tambah Kategori di atas.
                   </td>
@@ -141,6 +142,9 @@ export function KategoriClient({ initialData, statusParam }: KategoriClientProps
                         month: "short",
                         year: "numeric",
                       })}
+                    </td>
+                    <td className="py-3.5 px-4 text-xs font-medium text-slate-700 whitespace-nowrap">
+                      {DEFAULT_OWNER_NAME}
                     </td>
                     <td className="py-3.5 px-4 text-right">
                       <div className="flex items-center justify-end gap-1">

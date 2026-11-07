@@ -12,33 +12,66 @@ import {
   Calendar,
   User,
   ShoppingBag,
+  Coins,
+  CupSoda,
+  TrendingUp,
+  Calculator,
 } from "lucide-react";
 import { Breadcrumbs } from "@/components/dashboard/breadcrumb";
 import { Pagination } from "@/components/ui/pagination";
 import { Tooltip } from "@/components/ui/tooltip";
 import { MenuImage } from "@/components/ui/menu-image";
-import type { TransaksiRecord } from "@/app/actions/transaksi";
+import { getTodayDateString, formatDateWita } from "@/libs/date";
+import type {
+  TransaksiRecord,
+  TodaySalesSummary,
+} from "@/app/actions/transaksi";
 
 interface PenjualanClientProps {
   initialTransactions: TransaksiRecord[];
+  todayStats?: TodaySalesSummary;
+  todayStr?: string;
 }
 
-export function PenjualanClient({ initialTransactions }: PenjualanClientProps) {
+export function PenjualanClient({
+  initialTransactions,
+  todayStats = {
+    totalOmset: 0,
+    totalModal: 0,
+    totalKeuntungan: 0,
+    marginPersen: 0,
+    totalTransaksi: 0,
+    totalItemTerjual: 0,
+  },
+  todayStr = getTodayDateString(),
+}: PenjualanClientProps) {
   const [transactions] = useState<TransaksiRecord[]>(initialTransactions);
   const [searchQuery, setSearchQuery] = useState("");
+  const [dateFilter, setDateFilter] = useState<"today" | "all">("today");
   const [selectedMethod, setSelectedMethod] = useState<string>("all");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  // Modal Detail Transaksi / Nota
+  // modal detail transaksi nota
   const [selectedTrx, setSelectedTrx] = useState<TransaksiRecord | null>(null);
 
-  // Filter Data
+  // filter data transaksi
   const filteredData = transactions.filter((trx) => {
+    // filter waktu: default hari ini
+    if (dateFilter === "today") {
+      const trxDate = formatDateWita(trx.created_at);
+      if (trxDate !== todayStr) return false;
+    }
+
+    // filter metode pembayaran
     const matchMethod =
       selectedMethod === "all" || trx.metode_pembayaran === selectedMethod;
+    if (!matchMethod) return false;
 
-    const query = searchQuery.toLowerCase();
+    // filter pencarian teks
+    const query = searchQuery.toLowerCase().trim();
+    if (!query) return true;
+
     const matchInvoice = trx.nomor_invoice.toLowerCase().includes(query);
     const matchItems = trx.item_pembelian?.some((item) =>
       item.nama_produk.toLowerCase().includes(query)
@@ -47,7 +80,7 @@ export function PenjualanClient({ initialTransactions }: PenjualanClientProps) {
       trx.kasir?.full_name?.toLowerCase().includes(query) ||
       trx.kasir?.username.toLowerCase().includes(query);
 
-    return matchMethod && (matchInvoice || matchItems || matchKasir);
+    return matchInvoice || matchItems || matchKasir;
   });
 
   const totalItems = filteredData.length;
@@ -59,10 +92,10 @@ export function PenjualanClient({ initialTransactions }: PenjualanClientProps) {
 
   return (
     <div className="space-y-6 w-full">
-      {/* Breadcrumb Navigasi */}
+      {/* breadcrumb navigasi */}
       <Breadcrumbs items={[{ label: "Data Penjualan" }]} />
 
-      {/* Header Halaman */}
+      {/* header halaman */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-5 bg-white rounded-xl border border-slate-200 shadow-xs">
         <div>
           <h2 className="text-xl font-bold text-slate-900 tracking-tight">
@@ -74,11 +107,93 @@ export function PenjualanClient({ initialTransactions }: PenjualanClientProps) {
         </div>
       </div>
 
-      {/* Filter & Pencarian */}
+      {/* ringkasan metrik statistik hari ini */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* total omset hari ini */}
+        <div className="p-5 bg-white rounded-xl border border-slate-200 shadow-xs space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+              Total Omset Hari Ini
+            </span>
+            <div className="p-2 rounded-lg bg-blue-50 text-blue-700">
+              <TrendingUp className="h-5 w-5" />
+            </div>
+          </div>
+          <div>
+            <div className="text-2xl font-bold text-slate-900">
+              Rp {todayStats.totalOmset.toLocaleString("id-ID")}
+            </div>
+            <p className="text-xs text-slate-500 mt-0.5">Pendapatan kotor penjualan</p>
+          </div>
+        </div>
+
+        {/* keuntungan bersih hari ini */}
+        <div className="p-5 bg-white rounded-xl border border-slate-200 shadow-xs space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+              Keuntungan Bersih Hari Ini
+            </span>
+            <div className="p-2 rounded-lg bg-emerald-50 text-emerald-700">
+              <Coins className="h-5 w-5" />
+            </div>
+          </div>
+          <div>
+            <div className="text-2xl font-bold text-emerald-700">
+              Rp {(todayStats.totalKeuntungan ?? 0).toLocaleString("id-ID")}
+            </div>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Margin profit:{" "}
+              <span className="font-semibold text-emerald-800">
+                {todayStats.marginPersen ?? 0}%
+              </span>
+            </p>
+          </div>
+        </div>
+
+        {/* total modal HPP hari ini */}
+        <div className="p-5 bg-white rounded-xl border border-slate-200 shadow-xs space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+              Total Modal (HPP) Hari Ini
+            </span>
+            <div className="p-2 rounded-lg bg-amber-50 text-amber-700">
+              <Calculator className="h-5 w-5" />
+            </div>
+          </div>
+          <div>
+            <div className="text-2xl font-bold text-slate-900">
+              Rp {(todayStats.totalModal ?? 0).toLocaleString("id-ID")}
+            </div>
+            <p className="text-xs text-slate-500 mt-0.5">Biaya pokok menu terjual</p>
+          </div>
+        </div>
+
+        {/* cup terjual hari ini */}
+        <div className="p-5 bg-white rounded-xl border border-slate-200 shadow-xs space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+              Cup Terjual Hari Ini
+            </span>
+            <div className="p-2 rounded-lg bg-tea-50 text-tea-700">
+              <CupSoda className="h-5 w-5" />
+            </div>
+          </div>
+          <div>
+            <div className="text-2xl font-bold text-slate-900">
+              {todayStats.totalItemTerjual}
+            </div>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Dari {todayStats.totalTransaksi} nota selesai
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* filter & pencarian */}
       <div className="p-4 bg-white rounded-xl border border-slate-200 shadow-xs space-y-3">
-        <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-center">
-          {/* Input Pencarian */}
-          <div className="sm:col-span-8 relative">
+        <div className="flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between">
+          {/* input pencarian */}
+          <div className="relative flex-1">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
             <input
               type="text"
@@ -92,30 +207,65 @@ export function PenjualanClient({ initialTransactions }: PenjualanClientProps) {
             />
           </div>
 
-          {/* Filter Metode Pembayaran */}
-          <div className="sm:col-span-4 flex items-center gap-1.5 overflow-x-auto text-xs">
-            {[
-              { id: "all", label: "Semua" },
-              { id: "tunai", label: "Tunai" },
-              { id: "qris", label: "QRIS" },
-              { id: "transfer", label: "Transfer" },
-            ].map((m) => (
+          <div className="flex flex-wrap items-center gap-2">
+            {/* filter periode: hari ini (default) & semua */}
+            <div className="flex items-center gap-1 p-1 bg-slate-100 rounded-lg text-xs">
               <button
-                key={m.id}
                 type="button"
                 onClick={() => {
-                  setSelectedMethod(m.id);
+                  setDateFilter("today");
                   setCurrentPage(1);
                 }}
-                className={`px-3 py-2 rounded-lg font-medium whitespace-nowrap transition-colors cursor-pointer flex-1 text-center ${
-                  selectedMethod === m.id
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md font-medium transition-colors cursor-pointer ${
+                  dateFilter === "today"
                     ? "bg-tea-700 text-white shadow-xs"
-                    : "bg-slate-100 hover:bg-slate-200 text-slate-700"
+                    : "text-slate-600 hover:text-slate-900"
                 }`}
               >
-                {m.label}
+                <Calendar className="h-3.5 w-3.5" />
+                <span>Hari Ini</span>
               </button>
-            ))}
+              <button
+                type="button"
+                onClick={() => {
+                  setDateFilter("all");
+                  setCurrentPage(1);
+                }}
+                className={`px-3 py-1.5 rounded-md font-medium transition-colors cursor-pointer ${
+                  dateFilter === "all"
+                    ? "bg-tea-700 text-white shadow-xs"
+                    : "text-slate-600 hover:text-slate-900"
+                }`}
+              >
+                Semua
+              </button>
+            </div>
+
+            {/* filter metode pembayaran */}
+            <div className="flex items-center gap-1 p-1 bg-slate-100 rounded-lg text-xs">
+              {[
+                { id: "all", label: "Semua" },
+                { id: "tunai", label: "Tunai" },
+                { id: "qris", label: "QRIS" },
+                { id: "transfer", label: "Transfer" },
+              ].map((m) => (
+                <button
+                  key={m.id}
+                  type="button"
+                  onClick={() => {
+                    setSelectedMethod(m.id);
+                    setCurrentPage(1);
+                  }}
+                  className={`px-2.5 py-1.5 rounded-md font-medium whitespace-nowrap transition-colors cursor-pointer ${
+                    selectedMethod === m.id
+                      ? "bg-tea-700 text-white shadow-xs"
+                      : "text-slate-600 hover:text-slate-900"
+                  }`}
+                >
+                  {m.label}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </div>
@@ -128,7 +278,7 @@ export function PenjualanClient({ initialTransactions }: PenjualanClientProps) {
               <tr>
                 <th scope="col" className="py-3 px-4">Waktu</th>
                 <th scope="col" className="py-3 px-4">No. Invoice</th>
-                <th scope="col" className="py-3 px-4">Kasir</th>
+                <th scope="col" className="py-3 px-4">Oleh</th>
                 <th scope="col" className="py-3 px-4">Menu Dipesan</th>
                 <th scope="col" className="py-3 px-4">Metode</th>
                 <th scope="col" className="py-3 px-4 text-right">Total Tagihan</th>
@@ -163,9 +313,9 @@ export function PenjualanClient({ initialTransactions }: PenjualanClientProps) {
                       {trx.nomor_invoice}
                     </td>
 
-                    {/* Kasir */}
-                    <td className="py-3.5 px-4 text-xs text-slate-600 whitespace-nowrap">
-                      {trx.kasir?.full_name || trx.kasir?.username || "Kasir"}
+                    {/* Oleh */}
+                    <td className="py-3.5 px-4 text-xs font-medium text-slate-700 whitespace-nowrap">
+                      {trx.kasir?.full_name || "Kasir"}
                     </td>
 
                     {/* Rangkuman Item */}
@@ -284,7 +434,7 @@ export function PenjualanClient({ initialTransactions }: PenjualanClientProps) {
               <div>
                 <span className="block text-slate-400">Petugas Kasir</span>
                 <span className="font-medium text-slate-800">
-                  {selectedTrx.kasir?.full_name || selectedTrx.kasir?.username || "Kasir"}
+                  {selectedTrx.kasir?.full_name || "Kasir"}
                 </span>
               </div>
               <div>

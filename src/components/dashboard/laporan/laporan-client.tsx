@@ -25,6 +25,7 @@ import { Breadcrumbs } from "@/components/dashboard/breadcrumb";
 import { Pagination } from "@/components/ui/pagination";
 import { Tooltip } from "@/components/ui/tooltip";
 import { MenuImage } from "@/components/ui/menu-image";
+import { getTodayDateString, formatDateWita } from "@/libs/date";
 import {
   getLaporanPenjualanAction,
   type LaporanSummary,
@@ -33,9 +34,10 @@ import {
 
 interface LaporanClientProps {
   initialData: LaporanSummary;
+  initialDate?: string;
 }
 
-export function LaporanClient({ initialData }: LaporanClientProps) {
+export function LaporanClient({ initialData, initialDate }: LaporanClientProps) {
   const [data, setData] = useState<LaporanSummary>(initialData);
   const [isPending, startTransition] = useTransition();
   const [printTime, setPrintTime] = useState("");
@@ -45,13 +47,13 @@ export function LaporanClient({ initialData }: LaporanClientProps) {
   }, []);
 
   // format tanggal yyyy-mm-dd
-  const formatDateInput = (d: Date) => d.toISOString().split("T")[0];
-  const todayStr = formatDateInput(new Date());
+  const formatDateInput = (d: Date) => formatDateWita(d);
+  const todayStr = initialDate || getTodayDateString();
 
-  // state rentang tanggal
-  const [activePreset, setActivePreset] = useState<string>("all");
-  const [startDate, setStartDate] = useState<string>("");
-  const [endDate, setEndDate] = useState<string>("");
+  // state rentang tanggal: default hari ini
+  const [activePreset, setActivePreset] = useState<string>("today");
+  const [startDate, setStartDate] = useState<string>(todayStr);
+  const [endDate, setEndDate] = useState<string>(todayStr);
 
   // tab aktif menu atau transaksi
   const [activeTab, setActiveTab] = useState<"menu" | "transaksi">("menu");
@@ -516,10 +518,10 @@ export function LaporanClient({ initialData }: LaporanClientProps) {
           {/* tombol preset tanggal */}
           <div className="flex flex-wrap items-center gap-2 text-xs">
             {[
-              { id: "all", label: "Semua Waktu" },
               { id: "today", label: "Hari Ini" },
               { id: "last7days", label: "7 Hari Terakhir" },
               { id: "thisMonth", label: "Bulan Ini" },
+              { id: "all", label: "Semua Waktu" },
             ].map((btn) => (
               <button
                 key={btn.id}
@@ -997,7 +999,7 @@ export function LaporanClient({ initialData }: LaporanClientProps) {
                     <tr>
                       <th scope="col" className="py-3 px-4">Waktu</th>
                       <th scope="col" className="py-3 px-4">No. Invoice</th>
-                      <th scope="col" className="py-3 px-4">Kasir</th>
+                      <th scope="col" className="py-3 px-4">Oleh</th>
                       <th scope="col" className="py-3 px-4">Metode</th>
                       <th scope="col" className="py-3 px-4 text-right">Total Tagihan</th>
                       <th scope="col" className="py-3 px-4 text-center w-24">Aksi</th>
@@ -1024,8 +1026,8 @@ export function LaporanClient({ initialData }: LaporanClientProps) {
                           <td className="py-3 px-4 font-semibold text-slate-900 whitespace-nowrap">
                             {trx.nomor_invoice}
                           </td>
-                          <td className="py-3 px-4 text-xs text-slate-600 whitespace-nowrap">
-                            {trx.kasir?.full_name || trx.kasir?.username || "Kasir"}
+                          <td className="py-3 px-4 text-xs font-medium text-slate-700 whitespace-nowrap">
+                            {trx.kasir?.full_name || "Kasir"}
                           </td>
                           <td className="py-3 px-4 whitespace-nowrap">
                             <span className="text-xs font-medium uppercase px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">
@@ -1111,7 +1113,7 @@ export function LaporanClient({ initialData }: LaporanClientProps) {
               <div>
                 <span className="block text-slate-400">Petugas Kasir</span>
                 <span className="font-medium text-slate-800">
-                  {selectedTrx.kasir?.full_name || selectedTrx.kasir?.username || "Kasir"}
+                  {selectedTrx.kasir?.full_name || "Kasir"}
                 </span>
               </div>
               <div>

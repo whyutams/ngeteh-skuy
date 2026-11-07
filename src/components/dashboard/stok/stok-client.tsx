@@ -18,6 +18,7 @@ import { Pagination } from "@/components/ui/pagination";
 import { Tooltip } from "@/components/ui/tooltip";
 import { AlertBanner } from "@/components/ui/alert-banner";
 import { Breadcrumbs } from "@/components/dashboard/breadcrumb";
+import { DEFAULT_OWNER_NAME } from "@/libs/constants";
 import type { StokLogItem } from "@/app/actions/stok";
 import type { MenuItem } from "@/app/actions/menu";
 
@@ -178,6 +179,7 @@ export function StokClient({
                     <th scope="col" className="py-3 px-4">Jumlah Stok</th>
                     <th scope="col" className="py-3 px-4">Satuan</th>
                     <th scope="col" className="py-3 px-4">Kondisi</th>
+                    <th scope="col" className="py-3 px-4">Oleh</th>
                     {isOwner && (
                       <th scope="col" className="py-3 px-4 text-right w-28">Aksi</th>
                     )}
@@ -186,7 +188,7 @@ export function StokClient({
                 <tbody className="divide-y divide-slate-100">
                   {paginatedProducts.length === 0 ? (
                     <tr>
-                      <td colSpan={isOwner ? 6 : 5} className="py-12 text-center text-slate-400">
+                      <td colSpan={isOwner ? 7 : 6} className="py-12 text-center text-slate-400">
                         <Boxes className="h-8 w-8 mx-auto mb-2 text-slate-300" />
                         Belum ada data stok produk.
                       </td>
@@ -239,6 +241,9 @@ export function StokClient({
                             </span>
                           )}
                         </td>
+                        <td className="py-3.5 px-4 text-xs font-medium text-slate-700 whitespace-nowrap">
+                          {DEFAULT_OWNER_NAME}
+                        </td>
                         {isOwner && (
                           <td className="py-3.5 px-4 text-right">
                             <Tooltip content="Sesuaikan Stok">
@@ -284,13 +289,12 @@ export function StokClient({
                   <th scope="col" className="py-3 px-4">Jumlah</th>
                   <th scope="col" className="py-3 px-4">Sebelum / Sesudah</th>
                   <th scope="col" className="py-3 px-4">Catatan</th>
-                  <th scope="col" className="py-3 px-4">Petugas</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {paginatedLogs.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="py-12 text-center text-slate-400">
+                    <td colSpan={6} className="py-12 text-center text-slate-400">
                       <History className="h-8 w-8 mx-auto mb-2 text-slate-300" />
                       Belum ada riwayat mutasi stok.
                     </td>
@@ -351,9 +355,6 @@ export function StokClient({
                       </td>
                       <td className="py-3 px-4 text-xs text-slate-500 max-w-xs truncate">
                         {log.catatan || "-"}
-                      </td>
-                      <td className="py-3 px-4 text-xs text-slate-600">
-                        {log.profil_pengguna?.full_name || log.profil_pengguna?.username || "Admin"}
                       </td>
                     </tr>
                   ))

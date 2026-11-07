@@ -388,3 +388,95 @@ export async function toggleStatusKaryawanAction(
     return { success: false, error: message };
   }
 }
+
+// hapus akun karyawan permanen (khusus owner)
+export async function deleteKaryawanAction(
+  userId: string,
+  confirmedUsername: string
+): Promise<KaryawanActionResult> {
+  const session = await getCurrentSession();
+  if (!session.user) {
+    return { success: false, error: "Sesi telah berakhir. Silakan login kembali." };
+  }
+  if (!session.isSuperadmin) {
+    return { success: false, error: "Akses ditolak. Fitur ini khusus Owner." };
+  }
+
+  if (userId === session.user.id) {
+    return { success: false, error: "Tidak dapat menghapus akun Anda sendiri." };
+  }
+
+  try {
+    const admin = createAdminClient();
+
+    let targetUsername = "";
+    let isTargetSuperadmin = false;
+
+    // periksa dari profil pengguna
+    try {
+      const { data: profile } = await admin
+        .from("profil_pengguna")
+        .select("id, username, role")
+        .eq("id", userId)
+        .maybeSingle();
+
+      if (profile) {
+        targetUsername = profile.username;
+        isTargetSuperadmin = profile.role === "superadmin";
+      }
+    } catch {
+      // lanjut ke pemeriksaan auth
+    }
+
+    // fallback periksa data auth jika tidak di profil
+    if (!targetUsername) {
+      const { data: authUser, error: authErr } =
+        await admin.auth.admin.getUserById(userId);
+      if (authErr || !authUser?.user) {
+        return { success: false, error: "Data karyawan tidak ditemukan." };
+      }
+      targetUsername =
+        authUser.user.user_metadata?.username ||
+        authUser.user.email?.replace(/@.*$/, "") ||
+        "";
+      isTargetSuperadmin =
+        authUser.user.user_metadata?.role === "superadmin" ||
+        (authUser.user.email || "").startsWith("estehadmin");
+    }
+
+    if (isTargetSuperadmin) {
+      return { success: false, error: "Akun Owner tidak dapat dihapus." };
+    }
+
+    // verifikasi kesesuaian username konfirmasi
+    if (
+      confirmedUsername.trim().toLowerCase() !==
+      targetUsername.trim().toLowerCase()
+    ) {
+      return {
+        success: false,
+        error: `Username konfirmasi tidak sesuai. Harap ketik "${targetUsername}".`,
+      };
+    }
+
+    // hapus profil pengguna
+    try {
+      await admin.from("profil_pengguna").delete().eq("id", userId);
+    } catch {
+      // abaikan jika tabel profil_pengguna belum tersedia
+    }
+
+    // hapus user auth supabase
+    const { error: deleteAuthErr } = await admin.auth.admin.deleteUser(userId);
+    if (deleteAuthErr) {
+      return { success: false, error: deleteAuthErr.message };
+    }
+
+    revalidatePath("/dashboard/karyawan");
+    return { success: true };
+  } catch (err) {
+    const message =
+      err instanceof Error ? err.message : "Gagal menghapus akun karyawan.";
+    return { success: false, error: message };
+  }
+}
