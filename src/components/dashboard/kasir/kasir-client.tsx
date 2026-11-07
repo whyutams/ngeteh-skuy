@@ -20,6 +20,7 @@ import {
   RotateCcw,
 } from "lucide-react";
 import { Breadcrumbs } from "@/components/dashboard/breadcrumb";
+import { ConfirmModal } from "@/components/ui/confirm-modal";
 import type { MenuItem } from "@/app/actions/menu";
 import type { KategoriItem } from "@/app/actions/kategori";
 import { createTransaksiAction } from "@/app/actions/transaksi";
@@ -42,6 +43,7 @@ export function KasirClient({ products, categories }: KasirClientProps) {
   const [paymentMethod, setPaymentMethod] = useState<"tunai" | "qris" | "transfer">("tunai");
   const [nominalBayar, setNominalBayar] = useState<string>("");
   const [trxSuccess, setTrxSuccess] = useState<{ invoice: string; kembalian: number } | null>(null);
+  const [isConfirmCheckoutOpen, setIsConfirmCheckoutOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -104,12 +106,13 @@ export function KasirClient({ products, categories }: KasirClientProps) {
   const nominalNumber = Number(nominalBayar) || 0;
   const kembalian = Math.max(0, nominalNumber - totalTagihan);
   const isBayarCukup =
-    paymentMethod !== "tunai" || nominalNumber >= totalTagihan;
+    paymentMethod !== "tunai" ||
+    (nominalBayar.trim().length > 0 && nominalNumber >= totalTagihan);
 
   // Buka modal checkout
   const handleOpenCheckout = () => {
     if (cart.length === 0) return;
-    setNominalBayar(totalTagihan.toString());
+    setNominalBayar("");
     setErrorMessage(null);
     setIsCheckoutModalOpen(true);
   };
@@ -594,12 +597,16 @@ export function KasirClient({ products, categories }: KasirClientProps) {
                       <span className="text-slate-600 font-medium">Uang Kembalian:</span>
                       <span
                         className={`font-bold text-sm ${
-                          nominalNumber < totalTagihan
+                          nominalBayar.trim() === ""
+                            ? "text-slate-400"
+                            : nominalNumber < totalTagihan
                             ? "text-rose-600"
                             : "text-emerald-700"
                         }`}
                       >
-                        {nominalNumber < totalTagihan
+                        {nominalBayar.trim() === ""
+                          ? "Rp 0"
+                          : nominalNumber < totalTagihan
                           ? "Kurang Rp " + (totalTagihan - nominalNumber).toLocaleString("id-ID")
                           : "Rp " + kembalian.toLocaleString("id-ID")}
                       </span>
@@ -619,7 +626,10 @@ export function KasirClient({ products, categories }: KasirClientProps) {
                   </button>
                   <button
                     type="button"
-                    onClick={handleProsesPembayaran}
+                    onClick={() => {
+                      if (!isBayarCukup || isPending) return;
+                      setIsConfirmCheckoutOpen(true);
+                    }}
                     disabled={!isBayarCukup || isPending}
                     className="inline-flex items-center gap-2 px-5 py-2 text-sm font-semibold text-white bg-tea-700 hover:bg-tea-800 rounded-lg shadow-sm transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                   >
@@ -641,6 +651,23 @@ export function KasirClient({ products, categories }: KasirClientProps) {
           </div>
         </div>
       )}
+
+      {/* modal dialog konfirmasi selesaikan transaksi */}
+      <ConfirmModal
+        isOpen={isConfirmCheckoutOpen}
+        title="Konfirmasi Transaksi"
+        description="Apakah pesanan pelanggan sudah sesuai? Pastikan seluruh menu pesanan dan nominal pembayaran sudah sesuai."
+        confirmText="Ya, Selesaikan"
+        cancelText="Batal"
+        variant="primary"
+        isLoading={isPending}
+        icon={<CheckCircle2 className="h-5 w-5" />}
+        onConfirm={() => {
+          setIsConfirmCheckoutOpen(false);
+          handleProsesPembayaran();
+        }}
+        onClose={() => setIsConfirmCheckoutOpen(false)}
+      />
     </div>
   );
 }

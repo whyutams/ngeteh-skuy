@@ -34,9 +34,11 @@ interface ProfilClientProps {
 export function ProfilClient({ initialProfile }: ProfilClientProps) {
   const router = useRouter();
   const [fullName, setFullName] = useState(initialProfile.full_name || "");
-  const [email, setEmail] = useState(
-    initialProfile.email || `${initialProfile.username}@ngeteh-skuyy.internal`
-  );
+  const initialEmail =
+    initialProfile.email && !initialProfile.email.endsWith("@ngeteh-skuyy.internal")
+      ? initialProfile.email
+      : "";
+  const [email, setEmail] = useState(initialEmail);
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showNewPassword, setShowNewPassword] = useState(false);
@@ -48,8 +50,9 @@ export function ProfilClient({ initialProfile }: ProfilClientProps) {
 
   const isOwner = initialProfile.role === "superadmin";
 
-  // Validasi real-time password & email
-  const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+  // Validasi real-time password & email (email opsional)
+  const isEmailValid =
+    email.trim().length === 0 || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
   const hasMinLen = newPassword.length >= 8;
   const hasLetters = /[A-Za-z]/.test(newPassword);
   const hasNumbers = /\d/.test(newPassword);
@@ -137,10 +140,12 @@ export function ProfilClient({ initialProfile }: ProfilClientProps) {
                 <User className="h-3.5 w-3.5 text-slate-400" />
                 @{initialProfile.username}
               </span>
-              <span className="flex items-center gap-1.5">
-                <Mail className="h-3.5 w-3.5 text-slate-400" />
-                {email}
-              </span>
+              {email ? (
+                <span className="flex items-center gap-1.5">
+                  <Mail className="h-3.5 w-3.5 text-slate-400" />
+                  {email}
+                </span>
+              ) : null}
               <span className="flex items-center gap-1 text-emerald-600 font-medium">
                 <CheckCircle2 className="h-3.5 w-3.5" /> Akun Aktif
               </span>
@@ -193,10 +198,10 @@ export function ProfilClient({ initialProfile }: ProfilClientProps) {
               )}
             </div>
 
-            {/* Email */}
+            {/* Email (Opsional) */}
             <div className="space-y-1.5 sm:col-span-2">
               <label htmlFor="email" className="block text-sm font-medium text-slate-700">
-                Email <span className="text-rose-500 ml-0.5">*</span>
+                Email
               </label>
               <input
                 id="email"
@@ -206,7 +211,6 @@ export function ProfilClient({ initialProfile }: ProfilClientProps) {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Masukkan email"
                 className="w-full bg-slate-50/60 border border-slate-200 rounded-lg py-2.5 px-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
-                required
               />
               {formState?.fieldErrors?.email && (
                 <p className="text-rose-500 text-xs mt-1">

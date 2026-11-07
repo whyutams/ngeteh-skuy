@@ -66,7 +66,7 @@ export function ConfirmModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-in fade-in duration-200">
       <div
         className="w-full max-w-md bg-white rounded-xl shadow-xl border border-slate-200 p-6 space-y-5 animate-in zoom-in-95 duration-200"
         role="dialog"

@@ -8,6 +8,7 @@ import {
   QrCode,
   CreditCard,
   Eye,
+  Trash2,
   X,
   Calendar,
   User,
@@ -20,17 +21,21 @@ import {
 import { Breadcrumbs } from "@/components/dashboard/breadcrumb";
 import { Pagination } from "@/components/ui/pagination";
 import { Tooltip } from "@/components/ui/tooltip";
+import { ConfirmModal } from "@/components/ui/confirm-modal";
+import { AlertBanner } from "@/components/ui/alert-banner";
 import { MenuImage } from "@/components/ui/menu-image";
 import { getTodayDateString, formatDateWita } from "@/libs/date";
-import type {
-  TransaksiRecord,
-  TodaySalesSummary,
+import {
+  deleteTransaksiAction,
+  type TransaksiRecord,
+  type TodaySalesSummary,
 } from "@/app/actions/transaksi";
 
 interface PenjualanClientProps {
   initialTransactions: TransaksiRecord[];
   todayStats?: TodaySalesSummary;
   todayStr?: string;
+  isOwner?: boolean;
 }
 
 export function PenjualanClient({
@@ -44,8 +49,9 @@ export function PenjualanClient({
     totalItemTerjual: 0,
   },
   todayStr = getTodayDateString(),
+  isOwner = false,
 }: PenjualanClientProps) {
-  const [transactions] = useState<TransaksiRecord[]>(initialTransactions);
+  const [transactions, setTransactions] = useState<TransaksiRecord[]>(initialTransactions);
   const [searchQuery, setSearchQuery] = useState("");
   const [dateFilter, setDateFilter] = useState<"today" | "all">("today");
   const [selectedMethod, setSelectedMethod] = useState<string>("all");
@@ -54,6 +60,29 @@ export function PenjualanClient({
 
   // modal detail transaksi nota
   const [selectedTrx, setSelectedTrx] = useState<TransaksiRecord | null>(null);
+
+  // modal konfirmasi hapus transaksi
+  const [deleteTarget, setDeleteTarget] = useState<TransaksiRecord | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [notificationMessage, setNotificationMessage] = useState<string | null>(null);
+
+  // eksekusi hapus transaksi
+  const handleConfirmDelete = async () => {
+    if (!deleteTarget) return;
+
+    setIsDeleting(true);
+    const res = await deleteTransaksiAction(deleteTarget.id);
+    setIsDeleting(false);
+
+    if (res.success) {
+      setTransactions((prev) => prev.filter((t) => t.id !== deleteTarget.id));
+      setDeleteTarget(null);
+      setNotificationMessage("Transaksi penjualan berhasil dihapus.");
+    } else {
+      setDeleteTarget(null);
+      alert(res.error || "Gagal menghapus transaksi.");
+    }
+  };
 
   // filter data transaksi
   const filteredData = transactions.filter((trx) => {
@@ -94,6 +123,14 @@ export function PenjualanClient({
     <div className="space-y-6 w-full">
       {/* breadcrumb navigasi */}
       <Breadcrumbs items={[{ label: "Data Penjualan" }]} />
+
+      {/* notifikasi sukses aksi crud */}
+      {notificationMessage && (
+        <AlertBanner
+          message={notificationMessage}
+          onClose={() => setNotificationMessage(null)}
+        />
+      )}
 
       {/* header halaman */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-5 bg-white rounded-xl border border-slate-200 shadow-xs">
@@ -362,16 +399,29 @@ export function PenjualanClient({
 
                     {/* Aksi */}
                     <td className="py-3.5 px-4 text-center whitespace-nowrap">
-                      <Tooltip content="Lihat Rincian Nota">
-                        <button
-                          type="button"
-                          onClick={() => setSelectedTrx(trx)}
-                          className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium text-tea-700 bg-tea-50 hover:bg-tea-100 border border-tea-200 rounded-lg transition-colors cursor-pointer"
-                        >
-                          <Eye className="h-3.5 w-3.5" />
-                          <span>Detail</span>
-                        </button>
-                      </Tooltip>
+                      <div className="flex items-center justify-center gap-1.5">
+                        <Tooltip content="Lihat Rincian Nota">
+                          <button
+                            type="button"
+                            onClick={() => setSelectedTrx(trx)}
+                            className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium text-tea-700 bg-tea-50 hover:bg-tea-100 border border-tea-200 rounded-lg transition-colors cursor-pointer"
+                          >
+                            <Eye className="h-3.5 w-3.5" />
+                            <span>Detail</span>
+                          </button>
+                        </Tooltip>
+                        {isOwner && (
+                          <Tooltip content="Hapus Transaksi">
+                            <button
+                              type="button"
+                              onClick={() => setDeleteTarget(trx)}
+                              className="inline-flex items-center justify-center p-1.5 text-rose-600 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-lg transition-colors cursor-pointer"
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </button>
+                          </Tooltip>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))
@@ -518,6 +568,19 @@ export function PenjualanClient({
           </div>
         </div>
       )}
+
+      {/* modal dialog konfirmasi hapus transaksi */}
+      <ConfirmModal
+        isOpen={Boolean(deleteTarget)}
+        title="Hapus Transaksi Penjualan"
+        description={`Apakah Anda yakin ingin menghapus data transaksi ${deleteTarget?.nomor_invoice}? Seluruh rincian item pesanan terkait akan dihapus secara permanen.`}
+        confirmText="Hapus Transaksi"
+        cancelText="Batal"
+        isLoading={isDeleting}
+        variant="danger"
+        onConfirm={handleConfirmDelete}
+        onClose={() => setDeleteTarget(null)}
+      />
     </div>
   );
 }

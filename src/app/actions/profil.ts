@@ -16,7 +16,7 @@ export interface ProfileActionResult {
 export async function updateProfileAction(
   payload: {
     full_name: string;
-    email: string;
+    email?: string;
     password?: string;
     confirm_password?: string;
   }
@@ -42,6 +42,14 @@ export async function updateProfileAction(
   const { full_name, email, password } = validation.data;
   const admin = createAdminClient();
 
+  const rawEmail = (email || "").trim();
+  const cleanEmail = rawEmail.length > 0 ? rawEmail.toLowerCase() : null;
+  const authEmail =
+    cleanEmail ||
+    (session.user.email?.endsWith("@ngeteh-skuyy.internal")
+      ? session.user.email
+      : `${session.profile?.username || "user"}@ngeteh-skuyy.internal`);
+
   try {
     // perbarui data di auth
     const updateAuthPayload: {
@@ -50,12 +58,12 @@ export async function updateProfileAction(
       user_metadata: Record<string, unknown>;
       password?: string;
     } = {
-      email: email.toLowerCase(),
+      email: authEmail,
       email_confirm: true,
       user_metadata: {
         ...(session.profile ? { username: session.profile.username, role: session.profile.role } : {}),
         full_name,
-        email: email.toLowerCase(),
+        email: cleanEmail,
       },
     };
 
@@ -91,7 +99,7 @@ export async function updateProfileAction(
           {
             id: session.user.id,
             username: session.profile?.username || "estehadmin",
-            email: email.toLowerCase(),
+            email: cleanEmail || authEmail,
             role: session.profile?.role || "superadmin",
             full_name,
             updated_at: new Date().toISOString(),

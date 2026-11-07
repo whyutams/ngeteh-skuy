@@ -4,6 +4,7 @@ import {
 } from "@/app/actions/transaksi";
 import { PenjualanClient } from "@/components/dashboard/penjualan/penjualan-client";
 import { getTodayDateString } from "@/libs/date";
+import { getCurrentSession } from "@/libs/auth-session";
 import { APP_NAME } from "@/libs/constants";
 
 export const metadata = {
@@ -11,6 +12,7 @@ export const metadata = {
 };
 
 export default async function PenjualanPage() {
+  const session = await getCurrentSession();
   const todayStr = getTodayDateString();
   const [trxRes, statsRes] = await Promise.all([
     getTransaksiListAction(),
@@ -31,6 +33,7 @@ export default async function PenjualanPage() {
         }
       }
       todayStr={todayStr}
+      isOwner={Boolean(session.isSuperadmin)}
     />
   );
 }

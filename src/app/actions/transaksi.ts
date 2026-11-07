@@ -245,6 +245,50 @@ export async function createTransaksiAction(
   }
 }
 
+// Hapus data transaksi penjualan (khusus Owner)
+export async function deleteTransaksiAction(id: string): Promise<{
+  success: boolean;
+  error?: string;
+}> {
+  const session = await getCurrentSession();
+  if (!session.isSuperadmin) {
+    return {
+      success: false,
+      error: "Hanya Owner yang berhak menghapus data transaksi penjualan.",
+    };
+  }
+
+  try {
+    const admin = createAdminClient();
+
+    // hapus rincian item pembelian
+    await admin.from("item_pembelian").delete().eq("transaksi_id", id);
+
+    // hapus transaksi penjualan
+    const { error } = await admin
+      .from("transaksi_penjualan")
+      .delete()
+      .eq("id", id);
+
+    if (error) {
+      return {
+        success: false,
+        error: error.message || "Gagal menghapus transaksi penjualan.",
+      };
+    }
+
+    revalidatePath("/dashboard/penjualan");
+    revalidatePath("/dashboard/laporan");
+    revalidatePath("/dashboard");
+
+    return { success: true };
+  } catch (err) {
+    const message =
+      err instanceof Error ? err.message : "Terjadi kesalahan sistem.";
+    return { success: false, error: message };
+  }
+}
+
 // Ambil seluruh daftar transaksi penjualan
 export async function getTransaksiListAction(): Promise<{
   success: boolean;

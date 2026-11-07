@@ -11,9 +11,13 @@ export const updateProfileSchema = z
     email: z
       .string()
       .trim()
-      .min(1, "Email wajib diisi")
-      .email("Format email tidak valid")
-      .max(100, "Email maksimal 100 karakter"),
+      .max(100, "Email maksimal 100 karakter")
+      .refine(
+        (val) => !val || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val),
+        "Format email tidak valid"
+      )
+      .optional()
+      .or(z.literal("")),
     password: z
       .string()
       .trim()
