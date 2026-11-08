@@ -305,7 +305,7 @@ export function MenuClient({
         isOpen={Boolean(deleteTarget)}
         onClose={() => setDeleteTarget(null)}
         onConfirm={handleConfirmDelete}
-        title="Hapus Menu Seduhan"
+        title="Hapus Menu"
         description={`Apakah Anda yakin ingin menghapus menu "${deleteTarget?.nama_produk}"? Data transaksi yang telah selesai akan tetap tersimpan.`}
         confirmText="Hapus"
         cancelText="Batal"

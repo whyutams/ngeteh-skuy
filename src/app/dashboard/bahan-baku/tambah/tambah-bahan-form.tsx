@@ -67,7 +67,7 @@ export function TambahBahanForm() {
             Tambah Bahan Baku
           </h2>
           <p className="text-sm text-slate-500 mt-1">
-            Daftarkan bahan baku atau kemasan baru untuk persediaan dan resep seduhan menu.
+            Daftarkan bahan baku atau kemasan baru untuk persediaan dan resep menu.
           </p>
         </div>
 

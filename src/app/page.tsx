@@ -40,10 +40,10 @@ export default async function LoginPage() {
         {/* Pesan Utama */}
         <div className="space-y-4 max-w-lg">
           <h1 className="text-3xl xl:text-4xl font-bold tracking-tight text-white leading-tight">
-            Seduhan hangat, suasana tenang, layanan tertata rapi.
+            Platform Operasional {APP_NAME}
           </h1>
           <p className="text-sm text-amber-100/80 leading-relaxed">
-            Platform operasional {APP_NAME}. Kelola layanan, stok seduhan, dan data transaksi dengan sistem yang andal.
+            Kelola layanan, stok, dan data transaksi dengan sistem yang andal.
           </p>
         </div>
 

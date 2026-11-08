@@ -88,7 +88,7 @@ export function PenyesuaianStokForm({
             Penyesuaian Stok Produk
           </h2>
           <p className="text-sm text-slate-500 mt-1">
-            Catat stok masuk, stok keluar (rusak/kadaluarsa), atau opname penyesuaian manual.
+            Catat stok masuk, stok keluar, atau penyesuaian manual.
           </p>
         </div>
 

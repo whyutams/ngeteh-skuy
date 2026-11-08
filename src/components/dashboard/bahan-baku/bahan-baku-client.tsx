@@ -107,7 +107,7 @@ export function BahanBakuClient({
             Kelola Bahan Baku
           </h2>
           <p className="text-sm text-slate-500 mt-1">
-            Persediaan bahan baku seduhan, perasa, sirup, topping, dan kemasan outlet.
+            Persediaan bahan baku menu, topping, dan kemasan.
           </p>
         </div>
 

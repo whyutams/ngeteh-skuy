@@ -104,10 +104,10 @@ export function StokClient({
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-5 bg-white rounded-xl border border-slate-200 shadow-xs">
         <div>
           <h2 className="text-xl font-bold text-slate-900 tracking-tight">
-            Kelola Stok Seduhan
+            Kelola Stok
           </h2>
           <p className="text-sm text-slate-500 mt-1">
-            Monitoring ketersediaan bahan, sisa porsi menu, dan catatan mutasi.
+            Monitoring ketersediaan stok produk.
           </p>
         </div>
 
@@ -146,7 +146,7 @@ export function StokClient({
           }`}
         >
           <History className="h-4 w-4" />
-          <span>Riwayat Mutasi Stok</span>
+          <span>Riwayat Penyesuaian Stok</span>
         </button>
       </div>
 
@@ -252,7 +252,7 @@ export function StokClient({
                                 className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium text-tea-700 bg-tea-50 hover:bg-tea-100 border border-tea-200 rounded-lg transition-colors cursor-pointer"
                               >
                                 <RefreshCw className="h-3 w-3" />
-                                <span>Mutasi</span>
+                                <span>Sesuaikan Stok</span>
                               </Link>
                             </Tooltip>
                           </td>

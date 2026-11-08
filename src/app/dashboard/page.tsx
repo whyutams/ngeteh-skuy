@@ -296,10 +296,10 @@ export default async function DashboardPage() {
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-base font-bold text-slate-900 tracking-tight">
-                Menu Seduhan Siap Jual
+                Jenis Menu
               </h3>
               <p className="text-xs text-slate-500 mt-0.5">
-                Katalog produk teh terpopuler di etalase kasir.
+                Preview katalog produk.
               </p>
             </div>
             <Link

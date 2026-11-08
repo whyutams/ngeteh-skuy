@@ -152,7 +152,7 @@ export function LaporanClient({ initialData, initialDate }: LaporanClientProps) 
       [],
       [
         "No",
-        "Nama Menu Seduhan",
+        "Nama Menu",
         "Kategori",
         "Harga Modal (Rp)",
         "Harga Jual (Rp)",
@@ -278,7 +278,7 @@ export function LaporanClient({ initialData, initialDate }: LaporanClientProps) 
                 NGETEH SKUYY
               </h1>
               <p className="text-xs text-slate-600">
-                Laporan Performa Penjualan & Keuntungan Menu Seduhan
+                Laporan Performa Penjualan & Keuntungan Menu
               </p>
             </div>
           </div>
@@ -329,7 +329,7 @@ export function LaporanClient({ initialData, initialDate }: LaporanClientProps) 
         <div className="mb-6">
           <div className="mb-2">
             <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wide">
-              Daftar Penjualan & Keuntungan Seluruh Menu Seduhan
+              Daftar Penjualan & Keuntungan Seluruh Menu
             </h3>
             <p className="text-[11px] text-slate-500">
               Rincian harga modal, harga jual, kuantitas terjual, perolehan omset, keuntungan bersih, dan margin
@@ -340,7 +340,7 @@ export function LaporanClient({ initialData, initialDate }: LaporanClientProps) 
             <thead>
               <tr className="bg-slate-100 text-slate-800 font-bold border-b border-slate-300">
                 <th className="py-2 px-1.5 border-r border-slate-300 text-center w-7">No</th>
-                <th className="py-2 px-2.5 border-r border-slate-300">Nama Menu Seduhan</th>
+                <th className="py-2 px-2.5 border-r border-slate-300">Nama Menu</th>
                 <th className="py-2 px-2 border-r border-slate-300">Kategori</th>
                 <th className="py-2 px-2 border-r border-slate-300 text-right">Modal</th>
                 <th className="py-2 px-2 border-r border-slate-300 text-right">Harga Jual</th>
@@ -885,7 +885,7 @@ export function LaporanClient({ initialData, initialDate }: LaporanClientProps) 
                   <thead className="bg-slate-50/80 text-xs font-semibold text-slate-700 border-b border-slate-200">
                     <tr>
                       <th scope="col" className="py-3 px-3 w-10 text-center">No</th>
-                      <th scope="col" className="py-3 px-4">Menu Seduhan</th>
+                      <th scope="col" className="py-3 px-4">Menu</th>
                       <th scope="col" className="py-3 px-3">Kategori</th>
                       <th scope="col" className="py-3 px-3 text-right">Modal</th>
                       <th scope="col" className="py-3 px-3 text-right">Harga Jual</th>
@@ -900,7 +900,7 @@ export function LaporanClient({ initialData, initialDate }: LaporanClientProps) 
                     {paginatedMenuList.length === 0 ? (
                       <tr>
                         <td colSpan={10} className="py-10 text-center text-slate-400">
-                          Tidak ada menu seduhan yang sesuai dengan pencarian.
+                          Tidak ada menu yang sesuai dengan pencarian.
                         </td>
                       </tr>
                     ) : (
