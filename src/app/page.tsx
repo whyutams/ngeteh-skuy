@@ -38,11 +38,12 @@ export default async function LoginPage() {
         </div>
 
         {/* Pesan Utama */}
-        <div className="space-y-4 max-w-lg">
+        <div className="space-y-4 max-w-2xl">
           <h1 className="text-3xl xl:text-4xl font-bold tracking-tight text-white leading-tight">
-            Platform Operasional {APP_NAME}
-          </h1>
+            DI BUAT DENGAN PENUH CINTA UNTUK KAMU
+                      </h1>
           <p className="text-sm text-amber-100/80 leading-relaxed">
+            Platform Operasional {APP_NAME} <br />
             Kelola layanan, stok, dan data transaksi dengan sistem yang andal.
           </p>
         </div>
