@@ -197,43 +197,10 @@ export async function createTransaksiAction(
       console.warn("Peringatan item_pembelian:", itemsErr.message);
     }
 
-    // potong stok dan catat riwayat mutasi
-    for (const item of input.items) {
-      const { data: currentProduct } = await admin
-        .from("produk_menu")
-        .select("id, stok")
-        .eq("id", item.produk_id)
-        .single();
-
-      if (currentProduct) {
-        const stokSebelum = currentProduct.stok || 0;
-        const stokSesudah = Math.max(0, stokSebelum - item.jumlah);
-
-        await admin
-          .from("produk_menu")
-          .update({
-            stok: stokSesudah,
-            updated_at: new Date().toISOString(),
-          })
-          .eq("id", item.produk_id);
-
-        await admin.from("riwayat_stok").insert({
-          produk_id: item.produk_id,
-          tipe_mutasi: "penjualan",
-          jumlah: item.jumlah,
-          stok_sebelum: stokSebelum,
-          stok_sesudah: stokSesudah,
-          catatan: `Penjualan ${nomor_invoice}`,
-          dibuat_oleh: validKasirId,
-        });
-      }
-    }
-
     // potong stok bahan baku berdasarkan komposisi resep menu
     await deductBahanBakuForSoldItems(input.items);
 
     revalidatePath("/dashboard/kasir");
-    revalidatePath("/dashboard/stok");
     revalidatePath("/dashboard/bahan-baku");
     revalidatePath("/dashboard/penjualan");
     revalidatePath("/dashboard");

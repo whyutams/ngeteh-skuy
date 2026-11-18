@@ -1,19 +1,17 @@
 import Link from "next/link";
-import Image from "next/image";
 import { MenuImage } from "@/components/ui/menu-image";
 import {
   Calculator,
   Package,
   FolderTree,
   CupSoda,
-  Boxes,
   Users,
-  AlertTriangle,
   ArrowRight,
 } from "lucide-react";
 import { Breadcrumbs } from "@/components/dashboard/breadcrumb";
 import { getCurrentSession } from "@/libs/auth-session";
 import { createAdminClient } from "@/libs/supabase/admin";
+import { getBahanBakuListAction } from "@/app/actions/bahan-baku";
 import { APP_NAME } from "@/libs/constants";
 
 export const metadata = {
@@ -26,15 +24,15 @@ export default async function DashboardPage() {
 
   let totalMenu = 0;
   let totalKategori = 0;
-  let stokMenipis = 0;
+  let totalBahanBaku = 0;
   let totalKaryawan = 0;
   let recentMenus: Array<{
     id: string;
     nama_produk: string;
     gambar_url: string | null;
     harga: number;
-    stok: number;
     satuan: string;
+    status_aktif: boolean;
     kategori_menu?: { nama_kategori: string } | null;
   }> = [];
 
@@ -44,23 +42,20 @@ export default async function DashboardPage() {
     const [
       { count: menuCount },
       { count: katCount },
-      { count: stokCount },
+      bahanRes,
       { count: empCount },
       { data: menuData },
     ] = await Promise.all([
       admin.from("produk_menu").select("*", { count: "exact", head: true }),
       admin.from("kategori_menu").select("*", { count: "exact", head: true }),
-      admin
-        .from("produk_menu")
-        .select("*", { count: "exact", head: true })
-        .lte("stok", 5),
+      getBahanBakuListAction(),
       admin
         .from("profil_pengguna")
         .select("*", { count: "exact", head: true })
         .eq("role", "karyawan"),
       admin
         .from("produk_menu")
-        .select("id, nama_produk, gambar_url, harga, stok, satuan, kategori_menu(nama_kategori)")
+        .select("id, nama_produk, gambar_url, harga, satuan, status_aktif, kategori_menu(nama_kategori)")
         .eq("status_aktif", true)
         .order("created_at", { ascending: false })
         .limit(4),
@@ -68,7 +63,7 @@ export default async function DashboardPage() {
 
     totalMenu = menuCount || 0;
     totalKategori = katCount || 0;
-    stokMenipis = stokCount || 0;
+    totalBahanBaku = bahanRes.data?.length || 0;
     totalKaryawan = empCount || 0;
     recentMenus = (menuData as unknown as typeof recentMenus) || [];
   } catch {
@@ -136,31 +131,19 @@ export default async function DashboardPage() {
           </div>
         </div>
 
-        {/* Peringatan Stok Menipis */}
+        {/* Total Bahan Baku */}
         <div className="p-5 bg-white rounded-xl border border-slate-200 shadow-xs space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
-              Stok Menipis
+              Bahan Baku
             </span>
-            <div
-              className={`p-2 rounded-lg ${
-                stokMenipis > 0
-                  ? "bg-rose-50 text-rose-600"
-                  : "bg-emerald-50 text-emerald-700"
-              }`}
-            >
-              <AlertTriangle className="h-5 w-5" />
+            <div className="p-2 rounded-lg bg-emerald-50 text-emerald-700">
+              <Package className="h-5 w-5" />
             </div>
           </div>
           <div>
-            <div
-              className={`text-2xl font-bold ${
-                stokMenipis > 0 ? "text-rose-600" : "text-slate-900"
-              }`}
-            >
-              {stokMenipis}
-            </div>
-            <p className="text-xs text-slate-500 mt-0.5">Menu stok &le; 5 unit</p>
+            <div className="text-2xl font-bold text-slate-900">{totalBahanBaku}</div>
+            <p className="text-xs text-slate-500 mt-0.5">Item bahan terdata</p>
           </div>
         </div>
 
@@ -187,7 +170,7 @@ export default async function DashboardPage() {
           <h3 className="text-base font-bold text-slate-900 tracking-tight">
             Menu Akses Cepat Owner
           </h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <Link
               href="/dashboard/bahan-baku"
               className="group p-4 bg-white rounded-xl border border-slate-200 hover:border-tea-700 hover:shadow-xs transition-all space-y-2"
@@ -244,26 +227,6 @@ export default async function DashboardPage() {
                 </h4>
                 <p className="text-xs text-slate-500 mt-0.5">
                   Atur harga jual dan ketersediaan menu.
-                </p>
-              </div>
-            </Link>
-
-            <Link
-              href="/dashboard/stok"
-              className="group p-4 bg-white rounded-xl border border-slate-200 hover:border-tea-700 hover:shadow-xs transition-all space-y-2"
-            >
-              <div className="flex items-center justify-between">
-                <div className="p-2 rounded-lg bg-tea-50 text-tea-700">
-                  <Boxes className="h-5 w-5" />
-                </div>
-                <ArrowRight className="h-4 w-4 text-slate-400 group-hover:text-tea-700 transition-colors" />
-              </div>
-              <div>
-                <h4 className="text-sm font-semibold text-slate-900 group-hover:text-tea-700 transition-colors">
-                  Kelola Stok
-                </h4>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  Restok bahan dan penyesuaian porsi riil.
                 </p>
               </div>
             </Link>
@@ -342,8 +305,8 @@ export default async function DashboardPage() {
                     <span className="font-bold text-slate-900">
                       Rp {p.harga.toLocaleString("id-ID")}
                     </span>
-                    <span className="text-slate-500 text-[11px]">
-                      Stok: {p.stok}
+                    <span className="text-emerald-700 font-medium text-[11px]">
+                      {p.status_aktif ? "Tersedia" : "Nonaktif"}
                     </span>
                   </div>
                 </div>

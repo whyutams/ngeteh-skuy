@@ -135,7 +135,7 @@ export function EditMenuForm({
         harga_modal: Number(hargaModal) || 0,
         harga: Number(harga),
         satuan: satuan.trim() || "cup",
-        stok: initialData.stok,
+        stok: 0,
         status_aktif: statusAktif,
         resep: validResep,
       });

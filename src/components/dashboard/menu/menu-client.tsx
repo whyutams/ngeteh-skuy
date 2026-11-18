@@ -183,7 +183,7 @@ export function MenuClient({
                 {isOwner && (
                   <th scope="col" className="py-3 px-4 text-right">Untung / Cup</th>
                 )}
-                <th scope="col" className="py-3 px-4">Sisa Stok</th>
+                <th scope="col" className="py-3 px-4 text-center whitespace-nowrap">Bahan Baku</th>
                 <th scope="col" className="py-3 px-4">Status</th>
                 <th scope="col" className="py-3 px-4">Oleh</th>
                 {isOwner && (
@@ -235,15 +235,15 @@ export function MenuClient({
                         </span>
                       </td>
                     )}
-                    <td className="py-3.5 px-4">
+                    <td className="py-3.5 px-4 text-center whitespace-nowrap">
                       <span
-                        className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold ${
-                          item.stok <= 5
-                            ? "bg-rose-50 text-rose-700 border border-rose-200"
-                            : "bg-slate-100 text-slate-700 border border-slate-200"
+                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${
+                          (item.total_bahan ?? 0) > 0
+                            ? "bg-tea-50 text-tea-800 border border-tea-200"
+                            : "bg-slate-100 text-slate-500 border border-slate-200"
                         }`}
                       >
-                        {item.stok} {item.satuan}
+                        {item.total_bahan ?? 0} Bahan
                       </span>
                     </td>
                     <td className="py-3.5 px-4">

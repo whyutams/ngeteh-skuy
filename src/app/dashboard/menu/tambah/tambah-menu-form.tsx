@@ -34,7 +34,6 @@ export function TambahMenuForm({
   const [kategoriId, setKategoriId] = useState("");
   const [hargaModal, setHargaModal] = useState("0");
   const [harga, setHarga] = useState("");
-  const [stok, setStok] = useState("0");
   const [satuan, setSatuan] = useState("cup");
   const [statusAktif, setStatusAktif] = useState(true);
   const [gambarUrl, setGambarUrl] = useState("");
@@ -120,7 +119,7 @@ export function TambahMenuForm({
         harga_modal: Number(hargaModal) || 0,
         harga: Number(harga),
         satuan: satuan.trim() || "cup",
-        stok: Number(stok) || 0,
+        stok: 0,
         status_aktif: statusAktif,
         resep: validResep,
       });
@@ -333,29 +332,6 @@ export function TambahMenuForm({
                 </div>
               </div>
             )}
-
-            {/* Stok Awal */}
-            <div className="space-y-1.5">
-              <label htmlFor="stok" className="block text-sm font-medium text-slate-700">
-                Stok Awal <span className="text-rose-500 ml-0.5">*</span>
-              </label>
-              <input
-                id="stok"
-                name="stok"
-                type="number"
-                min={0}
-                value={stok}
-                onChange={(e) => setStok(e.target.value)}
-                placeholder="Masukkan stok"
-                className="w-full bg-slate-50/60 border border-slate-200 rounded-lg py-2.5 px-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
-                required
-              />
-              {formState?.fieldErrors?.stok && (
-                <p className="text-rose-500 text-xs mt-1">
-                  {formState.fieldErrors.stok[0]}
-                </p>
-              )}
-            </div>
 
             {/* Satuan */}
             <div className="space-y-1.5">

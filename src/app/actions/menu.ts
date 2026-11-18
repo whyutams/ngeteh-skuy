@@ -9,6 +9,10 @@ import {
   saveFallbackHargaModal,
   deleteFallbackHargaModal,
 } from "@/libs/harga-modal";
+import {
+  getFallbackBahanBakuList,
+  getFallbackResepList,
+} from "@/libs/bahan-baku-store";
 import { saveResepMenuAction } from "@/app/actions/bahan-baku";
 
 export interface MenuItem {
@@ -19,6 +23,8 @@ export interface MenuItem {
   harga: number;
   harga_modal: number;
   stok: number;
+  perkiraan_stok?: number;
+  total_bahan?: number;
   satuan: string;
   status_aktif: boolean;
   created_at: string;
@@ -72,9 +78,43 @@ export async function getMenuListAction(): Promise<{
       return { success: false, data: [], error: error.message };
     }
 
+    // hitung perkiraan stok otomatis berdasarkan ketersediaan bahan baku dan resep
+    const [allBahan, allResep] = await Promise.all([
+      getFallbackBahanBakuList(),
+      getFallbackResepList(),
+    ]);
+
+    const bahanMap = new Map(allBahan.map((b) => [b.id, b]));
+
+    const enrichedList = ((data as any[]) || []).map((row) => {
+      const resepForProd = allResep.filter((r) => r.produk_id === row.id);
+      let perkiraanStok = 0;
+
+      if (resepForProd.length > 0) {
+        const porsiList = resepForProd.map((r) => {
+          const bahan = bahanMap.get(r.bahan_id);
+          if (!bahan || Number(bahan.stok) <= 0 || Number(r.jumlah_pemakaian) <= 0) {
+            return 0;
+          }
+          return Math.floor(Number(bahan.stok) / Number(r.jumlah_pemakaian));
+        });
+        perkiraanStok = Math.max(0, Math.min(...porsiList));
+      } else {
+        // jika belum ada resep yang diatur, perkiraan stok = 0
+        perkiraanStok = 0;
+      }
+
+      return {
+        ...row,
+        stok: perkiraanStok,
+        perkiraan_stok: perkiraanStok,
+        total_bahan: resepForProd.length,
+      };
+    });
+
     return {
       success: true,
-      data: (data as unknown as MenuItem[]) || [],
+      data: (enrichedList as unknown as MenuItem[]) || [],
     };
   } catch (err) {
     const message = err instanceof Error ? err.message : "Gagal memuat menu.";
@@ -115,9 +155,38 @@ export async function getMenuByIdAction(id: string): Promise<{
       return { success: false, data: null, error: error.message };
     }
 
+    if (!data) {
+      return { success: true, data: null };
+    }
+
+    const [allBahan, allResep] = await Promise.all([
+      getFallbackBahanBakuList(),
+      getFallbackResepList(),
+    ]);
+
+    const bahanMap = new Map(allBahan.map((b) => [b.id, b]));
+    const resepForProd = allResep.filter((r) => r.produk_id === id);
+    let perkiraanStok = 0;
+
+    if (resepForProd.length > 0) {
+      const porsiList = resepForProd.map((r) => {
+        const bahan = bahanMap.get(r.bahan_id);
+        if (!bahan || Number(bahan.stok) <= 0 || Number(r.jumlah_pemakaian) <= 0) {
+          return 0;
+        }
+        return Math.floor(Number(bahan.stok) / Number(r.jumlah_pemakaian));
+      });
+      perkiraanStok = Math.max(0, Math.min(...porsiList));
+    }
+
     return {
       success: true,
-      data: (data as unknown as MenuItem) || null,
+      data: {
+        ...(data as any),
+        stok: perkiraanStok,
+        perkiraan_stok: perkiraanStok,
+        total_bahan: resepForProd.length,
+      } as unknown as MenuItem,
     };
   } catch (err) {
     const message = err instanceof Error ? err.message : "Gagal memuat detail menu.";
@@ -188,21 +257,7 @@ export async function createMenuAction(
       await saveResepMenuAction(newProd.id, validation.data.resep);
     }
 
-    // catat mutasi awal jika ada stok
-    if (validation.data.stok > 0) {
-      await admin.from("riwayat_stok").insert({
-        produk_id: newProd.id,
-        tipe_mutasi: "masuk",
-        jumlah: validation.data.stok,
-        stok_sebelum: 0,
-        stok_sesudah: validation.data.stok,
-        catatan: "Stok awal produk",
-        dibuat_oleh: session.user?.id || null,
-      });
-    }
-
     revalidatePath("/dashboard/menu");
-    revalidatePath("/dashboard/stok");
     revalidatePath("/dashboard/kasir");
     revalidatePath("/dashboard/laporan");
     return { success: true };
@@ -304,7 +359,6 @@ export async function deleteMenuAction(id: string): Promise<MenuActionResult> {
     await deleteFallbackHargaModal(id);
 
     revalidatePath("/dashboard/menu");
-    revalidatePath("/dashboard/stok");
     revalidatePath("/dashboard/kasir");
     return { success: true };
   } catch (err) {

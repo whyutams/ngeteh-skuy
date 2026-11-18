@@ -59,11 +59,12 @@ export function KasirClient({ products, categories }: KasirClientProps) {
 
   // Tambah item ke keranjang
   const addToCart = (product: MenuItem) => {
-    if (product.stok <= 0) return;
+    const maxStok = product.perkiraan_stok ?? product.stok ?? 0;
+    if (maxStok <= 0) return;
     setCart((prev) => {
       const existing = prev.find((item) => item.produk.id === product.id);
       if (existing) {
-        if (existing.jumlah >= product.stok) return prev;
+        if (existing.jumlah >= maxStok) return prev;
         return prev.map((item) =>
           item.produk.id === product.id
             ? { ...item, jumlah: item.jumlah + 1 }
@@ -80,8 +81,9 @@ export function KasirClient({ products, categories }: KasirClientProps) {
       prev
         .map((item) => {
           if (item.produk.id === productId) {
+            const maxStok = item.produk.perkiraan_stok ?? item.produk.stok ?? 0;
             const newQty = item.jumlah + delta;
-            if (newQty > item.produk.stok) return item;
+            if (newQty > maxStok) return item;
             return { ...item, jumlah: newQty };
           }
           return item;
@@ -234,16 +236,17 @@ export function KasirClient({ products, categories }: KasirClientProps) {
             <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-4">
               {filteredProducts.map((p) => {
                 const inCartItem = cart.find((item) => item.produk.id === p.id);
-                const isOutOfStock = p.stok <= 0;
+                const perkiraanStok = p.perkiraan_stok ?? p.stok ?? 0;
+                const isOutOfStock = perkiraanStok <= 0;
 
                 return (
                   <div
                     key={p.id}
                     onClick={() => !isOutOfStock && addToCart(p)}
-                    className={`group bg-white rounded-xl border transition-all overflow-hidden flex flex-col justify-between ${
+                    className={`group rounded-xl border transition-all overflow-hidden flex flex-col justify-between select-none ${
                       isOutOfStock
-                        ? "border-slate-200 opacity-60 cursor-not-allowed"
-                        : "border-slate-200 hover:border-tea-600 hover:shadow-sm cursor-pointer"
+                        ? "bg-slate-100/90 border-slate-200 opacity-60 grayscale cursor-not-allowed"
+                        : "bg-white border-slate-200 hover:border-tea-600 hover:shadow-sm cursor-pointer"
                     }`}
                   >
                     {/* Gambar Menu dari Supabase Storage */}
@@ -252,7 +255,11 @@ export function KasirClient({ products, categories }: KasirClientProps) {
                         src={p.gambar_url}
                         alt={p.nama_produk}
                         sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                        className="object-cover group-hover:scale-105 transition-transform duration-200"
+                        className={`object-cover ${
+                          isOutOfStock
+                            ? "grayscale filter"
+                            : "group-hover:scale-105 transition-transform duration-200"
+                        }`}
                         iconClassName="h-12 w-12 text-tea-700"
                       />
 
@@ -274,8 +281,8 @@ export function KasirClient({ products, categories }: KasirClientProps) {
 
                       {/* Badge Habis */}
                       {isOutOfStock && (
-                        <div className="absolute inset-0 bg-slate-900/60 flex items-center justify-center text-white font-bold text-xs uppercase tracking-wider">
-                          Stok Habis
+                        <div className="absolute inset-0 bg-slate-900/60 flex items-center justify-center text-white font-bold text-xs uppercase tracking-wider backdrop-blur-[1px]">
+                          Habis
                         </div>
                       )}
                     </div>
@@ -283,23 +290,31 @@ export function KasirClient({ products, categories }: KasirClientProps) {
                     {/* Informasi Produk */}
                     <div className="p-3.5 space-y-2 flex-1 flex flex-col justify-between">
                       <div>
-                        <h4 className="text-sm font-semibold text-slate-900 line-clamp-1 group-hover:text-tea-700 transition-colors">
+                        <h4 className={`text-sm font-semibold line-clamp-1 transition-colors ${
+                          isOutOfStock ? "text-slate-500" : "text-slate-900 group-hover:text-tea-700"
+                        }`}>
                           {p.nama_produk}
                         </h4>
-                        <div className="flex items-center justify-between mt-1 text-xs text-slate-500">
-                          <span>Sisa stok: {p.stok}</span>
+                        <div className="flex items-center justify-between mt-1 text-xs">
+                          <span className={isOutOfStock ? "text-slate-400" : "text-slate-500"}>
+                            Perkiraan: {perkiraanStok} porsi
+                          </span>
                           <span
                             className={
-                              p.stok <= 5 ? "text-amber-600 font-semibold" : "text-emerald-700"
+                              isOutOfStock
+                                ? "text-rose-500 font-semibold"
+                                : perkiraanStok <= 5
+                                ? "text-amber-600 font-semibold"
+                                : "text-emerald-700 font-medium"
                             }
                           >
-                            {p.stok <= 5 ? "Menipis" : "Tersedia"}
+                            {isOutOfStock ? "Habis" : perkiraanStok <= 5 ? "Menipis" : "Tersedia"}
                           </span>
                         </div>
                       </div>
 
                       <div className="pt-2 border-t border-slate-100 flex items-center justify-between">
-                        <span className="font-bold text-slate-900 text-sm">
+                        <span className={`font-bold text-sm ${isOutOfStock ? "text-slate-400" : "text-slate-900"}`}>
                           Rp {p.harga.toLocaleString("id-ID")}
                         </span>
                         <button
@@ -309,7 +324,11 @@ export function KasirClient({ products, categories }: KasirClientProps) {
                             e.stopPropagation();
                             if (!isOutOfStock) addToCart(p);
                           }}
-                          className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-tea-50 text-tea-700 hover:bg-tea-700 hover:text-white flex items-center gap-1 transition-colors cursor-pointer disabled:cursor-not-allowed disabled:opacity-40"
+                          className={`px-2.5 py-1 text-xs font-semibold rounded-lg flex items-center gap-1 transition-colors ${
+                            isOutOfStock
+                              ? "bg-slate-200 text-slate-400 cursor-not-allowed"
+                              : "bg-tea-50 text-tea-700 hover:bg-tea-700 hover:text-white cursor-pointer"
+                          }`}
                         >
                           <Plus className="h-3.5 w-3.5" />
                           <span>Pesan</span>
@@ -388,7 +407,7 @@ export function KasirClient({ products, categories }: KasirClientProps) {
                       <button
                         type="button"
                         onClick={() => updateQty(item.produk.id, 1)}
-                        disabled={item.jumlah >= item.produk.stok}
+                        disabled={item.jumlah >= (item.produk.perkiraan_stok ?? item.produk.stok ?? 0)}
                         className="h-6 w-6 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center cursor-pointer transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                       >
                         <Plus className="h-3 w-3" />

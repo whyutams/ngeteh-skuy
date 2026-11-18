@@ -8,7 +8,6 @@ import {
   Calculator,
   FolderTree,
   CupSoda,
-  Boxes,
   Package,
   Receipt,
   BarChart3,
@@ -72,12 +71,6 @@ export function Sidebar({
       name: "Kelola Menu",
       href: "/dashboard/menu",
       icon: CupSoda,
-      ownerOnly: false,
-    },
-    {
-      name: "Kelola Stok",
-      href: "/dashboard/stok",
-      icon: Boxes,
       ownerOnly: false,
     },
     {
