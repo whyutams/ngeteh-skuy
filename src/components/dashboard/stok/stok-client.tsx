@@ -181,7 +181,7 @@ export function StokClient({
                     <th scope="col" className="py-3 px-4">Kondisi</th>
                     <th scope="col" className="py-3 px-4">Oleh</th>
                     {isOwner && (
-                      <th scope="col" className="py-3 px-4 text-right w-28">Aksi</th>
+                      <th scope="col" className="py-3 px-4 text-right w-36 whitespace-nowrap">Aksi</th>
                     )}
                   </tr>
                 </thead>
@@ -209,10 +209,10 @@ export function StokClient({
                             <span className="font-semibold text-slate-900">{p.nama_produk}</span>
                           </div>
                         </td>
-                        <td className="py-3.5 px-4 text-xs text-slate-500">
+                        <td className="py-3.5 px-4 text-xs text-slate-500 whitespace-nowrap">
                           {p.kategori_menu?.nama_kategori || "-"}
                         </td>
-                        <td className="py-3.5 px-4 font-bold text-slate-900">
+                        <td className="py-3.5 px-4 font-bold text-slate-900 whitespace-nowrap">
                           <span
                             className={
                               p.stok === 0
@@ -225,8 +225,8 @@ export function StokClient({
                             {p.stok}
                           </span>
                         </td>
-                        <td className="py-3.5 px-4 text-slate-500">{p.satuan}</td>
-                        <td className="py-3.5 px-4">
+                        <td className="py-3.5 px-4 text-slate-500 whitespace-nowrap">{p.satuan}</td>
+                        <td className="py-3.5 px-4 whitespace-nowrap">
                           {p.stok === 0 ? (
                             <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-rose-50 text-rose-700 border border-rose-200">
                               Habis
@@ -245,13 +245,13 @@ export function StokClient({
                           {DEFAULT_OWNER_NAME}
                         </td>
                         {isOwner && (
-                          <td className="py-3.5 px-4 text-right">
+                          <td className="py-3.5 px-4 text-right whitespace-nowrap">
                             <Tooltip content="Sesuaikan Stok">
                               <Link
                                 href={`/dashboard/stok/penyesuaian?produk_id=${p.id}`}
-                                className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium text-tea-700 bg-tea-50 hover:bg-tea-100 border border-tea-200 rounded-lg transition-colors cursor-pointer"
+                                className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-tea-700 bg-tea-50 hover:bg-tea-100 border border-tea-200 rounded-lg transition-colors cursor-pointer whitespace-nowrap"
                               >
-                                <RefreshCw className="h-3 w-3" />
+                                <RefreshCw className="h-3 w-3 shrink-0" />
                                 <span>Sesuaikan Stok</span>
                               </Link>
                             </Tooltip>
